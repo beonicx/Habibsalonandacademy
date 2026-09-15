@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 const Booking = require("../../models/Booking");
 const Payment = require("../../models/Payment");
-const LoyaltyTransaction = require("../../models/LoyaltyTransaction");
+const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 
 async function getAllCustomers(req, res) {
   try {
@@ -57,10 +57,10 @@ async function getCustomerById(req, res) {
       return res.status(404).json({ error: "Customer not found" });
     }
 
-    const [bookings, payments, loyaltyHistory] = await Promise.all([
+    const [bookings, payments, superCoinHistory] = await Promise.all([
       Booking.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
       Payment.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
-      LoyaltyTransaction.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
+      SuperCoinTransaction.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
     ]);
 
     res.json({
@@ -69,7 +69,7 @@ async function getCustomerById(req, res) {
         customer,
         bookings,
         payments,
-        loyaltyHistory,
+        superCoinHistory,
       },
     });
   } catch (err) {

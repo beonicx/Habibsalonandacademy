@@ -1,4 +1,4 @@
-const LoyaltyTransaction = require("../../models/LoyaltyTransaction");
+const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 const User = require("../../models/User");
 const Notification = require("../../models/Notification");
 
@@ -14,12 +14,12 @@ async function getTransactions(req, res) {
     const skip = (Number(page) - 1) * Number(limit);
 
     const [transactions, total] = await Promise.all([
-      LoyaltyTransaction.find(filter)
+      SuperCoinTransaction.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit))
-        .populate("user", "name email phone loyaltyPoints"),
-      LoyaltyTransaction.countDocuments(filter),
+        .populate("user", "name email phone superCoins"),
+      SuperCoinTransaction.countDocuments(filter),
     ]);
 
     res.json({
@@ -33,23 +33,23 @@ async function getTransactions(req, res) {
       },
     });
   } catch (err) {
-    console.error("Get loyalty transactions error:", err);
-    res.status(500).json({ error: "Failed to fetch loyalty transactions" });
+    console.error("Get SuperCoin transactions error:", err);
+    res.status(500).json({ error: "Failed to fetch SuperCoin transactions" });
   }
 }
 
 async function getUserPoints(req, res) {
   try {
-    const user = await User.findById(req.params.userId).select("name email loyaltyPoints");
+    const user = await User.findById(req.params.userId).select("name email superCoins");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const history = await LoyaltyTransaction.find({ user: req.params.userId })
+    const history = await SuperCoinTransaction.find({ user: req.params.userId })
       .sort({ createdAt: -1 })
       .limit(50);
 
-    const stats = await LoyaltyTransaction.aggregate([
+    const stats = await SuperCoinTransaction.aggregate([
       { $match: { user: user._id } },
       {
         $group: {
@@ -66,15 +66,15 @@ async function getUserPoints(req, res) {
       success: true,
       data: {
         user,
-        currentBalance: user.loyaltyPoints,
+        currentBalance: user.superCoins,
         totalEarned,
         totalRedeemed,
         history,
       },
     });
   } catch (err) {
-    console.error("Get user points error:", err);
-    res.status(500).json({ error: "Failed to fetch user points" });
+    console.error("Get user SuperCoins error:", err);
+    res.status(500).json({ error: "Failed to fetch user SuperCoins" });
   }
 }
 
@@ -88,7 +88,7 @@ async function addPoints(req, res) {
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { $inc: { loyaltyPoints: points } },
+      { $inc: { superCoins: points } },
       { new: true }
     );
 
@@ -96,26 +96,26 @@ async function addPoints(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    await LoyaltyTransaction.create({
+    await SuperCoinTransaction.create({
       user: userId,
       points,
       type: "earned",
       source,
-      description: description || `Manually added ${points} points`,
-      balanceAfter: user.loyaltyPoints,
+      description: description || `Manually added ${points} SuperCoins`,
+      balanceAfter: user.superCoins,
     });
 
     await Notification.create({
       user: userId,
-      title: "Points Earned",
-      message: `You earned ${points} loyalty points! Current balance: ${user.loyaltyPoints}`,
-      type: "loyalty",
+      title: "SuperCoins Earned",
+      message: `You earned ${points} SuperCoins! Current balance: ${user.superCoins}`,
+      type: "supercoins",
     });
 
-    res.json({ success: true, data: { loyaltyPoints: user.loyaltyPoints } });
+    res.json({ success: true, data: { superCoins: user.superCoins } });
   } catch (err) {
-    console.error("Add points error:", err);
-    res.status(500).json({ error: "Failed to add points" });
+    console.error("Add SuperCoins error:", err);
+    res.status(500).json({ error: "Failed to add SuperCoins" });
   }
 }
 
@@ -132,33 +132,33 @@ async function redeemPoints(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.loyaltyPoints < points) {
-      return res.status(400).json({ error: "Insufficient loyalty points" });
+    if (user.superCoins < points) {
+      return res.status(400).json({ error: "Insufficient SuperCoins" });
     }
 
-    user.loyaltyPoints -= points;
+    user.superCoins -= points;
     await user.save();
 
-    await LoyaltyTransaction.create({
+    await SuperCoinTransaction.create({
       user: userId,
       points,
       type: "redeemed",
       source: "redemption",
-      description: description || `Redeemed ${points} points`,
-      balanceAfter: user.loyaltyPoints,
+      description: description || `Redeemed ${points} SuperCoins`,
+      balanceAfter: user.superCoins,
     });
 
     await Notification.create({
       user: userId,
-      title: "Points Redeemed",
-      message: `You redeemed ${points} loyalty points. Remaining balance: ${user.loyaltyPoints}`,
-      type: "loyalty",
+      title: "SuperCoins Redeemed",
+      message: `You redeemed ${points} SuperCoins. Remaining balance: ${user.superCoins}`,
+      type: "supercoins",
     });
 
-    res.json({ success: true, data: { loyaltyPoints: user.loyaltyPoints } });
+    res.json({ success: true, data: { superCoins: user.superCoins } });
   } catch (err) {
-    console.error("Redeem points error:", err);
-    res.status(500).json({ error: "Failed to redeem points" });
+    console.error("Redeem SuperCoins error:", err);
+    res.status(500).json({ error: "Failed to redeem SuperCoins" });
   }
 }
 
@@ -167,9 +167,9 @@ async function getLeaderboard(req, res) {
     const { limit = 20 } = req.query;
 
     const topCustomers = await User.find({ role: "user", isActive: true })
-      .sort({ loyaltyPoints: -1 })
+      .sort({ superCoins: -1 })
       .limit(Number(limit))
-      .select("name email phone loyaltyPoints totalSpent visitCount");
+      .select("name email phone superCoins totalSpent visitCount");
 
     res.json({ success: true, data: topCustomers });
   } catch (err) {

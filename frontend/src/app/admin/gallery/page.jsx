@@ -79,7 +79,7 @@ export default function AdminGalleryPage() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gallery</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage salon gallery images</p>
+          <p className="text-sm text-gray-600 mt-1">Manage salon gallery images</p>
         </div>
         <button onClick={openAdd} className="inline-flex items-center gap-2 bg-[#C9956B] text-white px-4 py-2.5 rounded-lg hover:bg-[#A67050] text-sm font-medium">
           <Plus size={16} /> Add Image
@@ -89,7 +89,7 @@ export default function AdminGalleryPage() {
       <div className="flex flex-wrap gap-2 mb-6">
         {["all", ...CATEGORIES].map(cat => (
           <button key={cat} onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-colors ${activeCategory === cat ? "bg-[#C9956B] text-white" : "bg-white border border-gray-200 text-gray-600 hover:border-[#C9956B]"}`}>
+            className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition-colors ${activeCategory === cat ? "bg-[#C9956B] text-white" : "bg-white border border-gray-200 text-gray-700 hover:border-[#C9956B]"}`}>
             {cat}
           </button>
         ))}
@@ -101,8 +101,8 @@ export default function AdminGalleryPage() {
         <div className="flex justify-center py-20"><Loader size={24} className="animate-spin text-[#C9956B]" /></div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <ImageIcon size={40} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">No images found</p>
+          <ImageIcon size={40} className="text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-600 text-sm">No images found</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -116,21 +116,21 @@ export default function AdminGalleryPage() {
                   </div>
                 )}
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => openEdit(img)} className="p-1.5 bg-white rounded-lg shadow hover:bg-gray-50"><Pencil size={14} className="text-gray-600" /></button>
+                  <button onClick={() => openEdit(img)} className="p-1.5 bg-white rounded-lg shadow hover:bg-gray-50"><Pencil size={14} className="text-gray-700" /></button>
                   <button onClick={() => setDeleteConfirm(img._id)} className="p-1.5 bg-white rounded-lg shadow hover:bg-gray-50"><Trash2 size={14} className="text-red-500" /></button>
                 </div>
               </div>
               <div className="p-3">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-medium text-gray-900 truncate">{img.title}</h3>
-                  <span className="text-[10px] uppercase font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{img.category}</span>
+                  <span className="text-[10px] uppercase font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{img.category}</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <button onClick={() => toggleActive(img)}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${img.isActive ? "bg-green-500" : "bg-gray-300"}`}>
                     <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${img.isActive ? "translate-x-4" : "translate-x-1"}`} />
                   </button>
-                  <span className="text-xs text-gray-400">Order: {img.sortOrder || 0}</span>
+                  <span className="text-xs text-gray-500">Order: {img.sortOrder || 0}</span>
                 </div>
               </div>
             </div>
@@ -144,28 +144,28 @@ export default function AdminGalleryPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">{modal === "add" ? "Add Image" : "Edit Image"}</h2>
-              <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+              <button onClick={() => setModal(null)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Title *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Title *</label>
                 <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Category *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Category *</label>
                 <select required value={form.category} onChange={e => setForm({...form, category: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]">
                   {CATEGORIES.map(c => <option key={c} value={c} className="capitalize">{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Image URL *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Image URL *</label>
                 <input required value={form.image} onChange={e => setForm({...form, image: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="https://..." />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Description</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Description</label>
                 <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={3}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B] resize-none" />
               </div>
@@ -184,9 +184,9 @@ export default function AdminGalleryPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center" onClick={e => e.stopPropagation()}>
             <Trash2 size={32} className="text-red-500 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Delete Image?</h3>
-            <p className="text-sm text-gray-500 mb-6">This action cannot be undone.</p>
+            <p className="text-sm text-gray-600 mb-6">This action cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
               <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">Delete</button>
             </div>
           </div>

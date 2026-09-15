@@ -20,7 +20,7 @@ async function getAllPlans(req, res) {
 
 async function createPlan(req, res) {
   try {
-    const { name, description, price, durationMonths, benefits, discountPercent, freeServices, loyaltyPointsMultiplier, sortOrder } = req.body;
+    const { name, description, price, durationMonths, benefits, discountPercent, freeServices, superCoinsMultiplier, sortOrder } = req.body;
 
     if (!name || price === undefined || !durationMonths) {
       return res.status(400).json({ error: "Name, price and duration are required" });
@@ -34,7 +34,7 @@ async function createPlan(req, res) {
       benefits,
       discountPercent,
       freeServices,
-      loyaltyPointsMultiplier,
+      superCoinsMultiplier,
       sortOrder,
     });
 
@@ -47,7 +47,7 @@ async function createPlan(req, res) {
 
 async function updatePlan(req, res) {
   try {
-    const fields = ["name", "description", "price", "durationMonths", "benefits", "discountPercent", "freeServices", "loyaltyPointsMultiplier", "isActive", "sortOrder"];
+    const fields = ["name", "description", "price", "durationMonths", "benefits", "discountPercent", "freeServices", "superCoinsMultiplier", "isActive", "sortOrder"];
     const updates = {};
     for (const f of fields) {
       if (req.body[f] !== undefined) updates[f] = req.body[f];

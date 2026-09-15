@@ -98,12 +98,12 @@ export const memberships = {
   cancel: (id) => adminFetch(`/admin/memberships/${id}/cancel`, { method: "PATCH" }).then((r) => r.json()),
 };
 
-export const loyalty = {
-  getTransactions: (params) => adminFetch(`/admin/loyalty/transactions${qs(params)}`).then((r) => r.json()),
-  getUserPoints: (userId) => adminFetch(`/admin/loyalty/user/${userId}`).then((r) => r.json()),
-  addPoints: (data) => adminFetch("/admin/loyalty/add", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
-  redeemPoints: (data) => adminFetch("/admin/loyalty/redeem", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
-  getLeaderboard: (params) => adminFetch(`/admin/loyalty/leaderboard${qs(params)}`).then((r) => r.json()),
+export const superCoins = {
+  getTransactions: (params) => adminFetch(`/admin/supercoins/transactions${qs(params)}`).then((r) => r.json()),
+  getUserPoints: (userId) => adminFetch(`/admin/supercoins/user/${userId}`).then((r) => r.json()),
+  addPoints: (data) => adminFetch("/admin/supercoins/add", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
+  redeemPoints: (data) => adminFetch("/admin/supercoins/redeem", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
+  getLeaderboard: (params) => adminFetch(`/admin/supercoins/leaderboard${qs(params)}`).then((r) => r.json()),
 };
 
 export const products = {

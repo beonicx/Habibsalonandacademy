@@ -10,7 +10,7 @@ router.use("/appointments", require("./appointments"));
 router.use("/payments", require("./payments"));
 router.use("/services", require("./services"));
 router.use("/memberships", require("./memberships"));
-router.use("/loyalty", require("./loyalty"));
+router.use("/supercoins", require("./supercoins"));
 router.use("/products", require("./products"));
 router.use("/notifications", require("./notifications"));
 router.use("/gallery", require("./gallery"));

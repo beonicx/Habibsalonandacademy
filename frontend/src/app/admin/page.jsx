@@ -9,7 +9,7 @@ const statusColors = {
   "in-progress": "bg-purple-50 text-purple-700 border-purple-200",
   completed: "bg-green-50 text-green-700 border-green-200",
   cancelled: "bg-red-50 text-red-700 border-red-200",
-  "no-show": "bg-gray-50 text-gray-600 border-gray-200",
+  "no-show": "bg-gray-50 text-gray-700 border-gray-200",
 };
 
 export default function AdminDashboard() {
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center py-32">
         <Loader size={24} className="animate-spin text-rose-gold" />
-        <span className="ml-2 text-sm text-gray-500">Loading...</span>
+        <span className="ml-2 text-sm text-gray-600">Loading...</span>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-600 mt-1">
           Overview of your salon performance
         </p>
       </div>
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
               className="bg-white rounded-xl border border-gray-200 shadow-sm p-5"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
                   {card.label}
                 </span>
                 <div
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
               </div>
               <p className="text-2xl font-bold text-gray-900">{card.value}</p>
               {card.sub && (
-                <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
+                <p className="text-xs text-gray-500 mt-1">{card.sub}</p>
               )}
             </div>
           );
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                 <th className="px-5 py-3">Customer</th>
                 <th className="px-5 py-3">Service</th>
                 <th className="px-5 py-3">Date</th>
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-5 py-8 text-center text-gray-400"
+                    className="px-5 py-8 text-center text-gray-500"
                   >
                     No recent bookings
                   </td>
@@ -159,19 +159,19 @@ export default function AdminDashboard() {
                       <p className="font-medium text-gray-900">
                         {b.customerName}
                       </p>
-                      <p className="text-xs text-gray-400">{b.customerEmail}</p>
+                      <p className="text-xs text-gray-500">{b.customerEmail}</p>
                     </td>
-                    <td className="px-5 py-3 text-gray-700">
+                    <td className="px-5 py-3 text-gray-800">
                       {b.services?.map((s) => s.name).join(", ") || "—"}
                     </td>
-                    <td className="px-5 py-3 text-gray-700">
+                    <td className="px-5 py-3 text-gray-800">
                       {new Date(b.date).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-5 py-3 text-gray-700">{b.timeSlot}</td>
+                    <td className="px-5 py-3 text-gray-800">{b.timeSlot}</td>
                     <td className="px-5 py-3">
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${

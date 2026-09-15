@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const loyaltyTransactionSchema = new mongoose.Schema(
+const superCoinTransactionSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ const loyaltyTransactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-loyaltyTransactionSchema.index({ user: 1, createdAt: -1 });
-loyaltyTransactionSchema.index({ type: 1 });
+superCoinTransactionSchema.index({ user: 1, createdAt: -1 });
+superCoinTransactionSchema.index({ type: 1 });
 
-module.exports = mongoose.model("LoyaltyTransaction", loyaltyTransactionSchema);
+module.exports = mongoose.model("SuperCoinTransaction", superCoinTransactionSchema);

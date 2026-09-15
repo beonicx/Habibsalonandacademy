@@ -14,7 +14,7 @@ const statusColors = {
   "in-progress": "bg-purple-50 text-purple-700",
   completed: "bg-green-50 text-green-700",
   cancelled: "bg-red-50 text-red-700",
-  "no-show": "bg-gray-100 text-gray-600",
+  "no-show": "bg-gray-100 text-gray-700",
 };
 
 export default function CustomerDetailPage() {
@@ -25,7 +25,7 @@ export default function CustomerDetailPage() {
   const [customer, setCustomer] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [loyaltyHistory, setLoyaltyHistory] = useState([]);
+  const [superCoinHistory, setSuperCoinHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
@@ -40,7 +40,7 @@ export default function CustomerDetailPage() {
           setCustomer(res.data.customer);
           setBookings(res.data.bookings || []);
           setPayments(res.data.payments || []);
-          setLoyaltyHistory(res.data.loyaltyHistory || []);
+          setSuperCoinHistory(res.data.superCoinHistory || []);
           setEditForm({
             name: res.data.customer.name || "",
             phone: res.data.customer.phone || "",
@@ -77,7 +77,7 @@ export default function CustomerDetailPage() {
     return (
       <div className="flex items-center justify-center py-32">
         <Loader size={24} className="animate-spin text-rose-gold" />
-        <span className="ml-2 text-sm text-gray-500">Loading...</span>
+        <span className="ml-2 text-sm text-gray-600">Loading...</span>
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function CustomerDetailPage() {
   if (error || !customer) {
     return (
       <div>
-        <Link href="/admin/customers" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
+        <Link href="/admin/customers" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4">
           <ArrowLeft size={16} /> Back to Customers
         </Link>
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
@@ -98,12 +98,12 @@ export default function CustomerDetailPage() {
   const statItems = [
     { label: "Visits", value: customer.visitCount || 0, icon: Calendar },
     { label: "Total Spent", value: `₹${(customer.totalSpent || 0).toLocaleString("en-IN")}`, icon: CreditCard },
-    { label: "Loyalty Points", value: customer.loyaltyPoints || 0, icon: Star },
+    { label: "SuperCoins", value: customer.superCoins || 0, icon: Star },
   ];
 
   return (
     <>
-      <Link href="/admin/customers" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6">
+      <Link href="/admin/customers" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6">
         <ArrowLeft size={16} /> Back to Customers
       </Link>
 
@@ -117,7 +117,7 @@ export default function CustomerDetailPage() {
             </button>
           ) : (
             <div className="flex gap-2">
-              <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600">
+              <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
                 <X size={14} /> Cancel
               </button>
               <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 text-sm text-rose-gold hover:opacity-80 disabled:opacity-50">
@@ -138,7 +138,7 @@ export default function CustomerDetailPage() {
               ) : (
                 <h2 className="text-xl font-bold text-gray-900">{customer.name}</h2>
               )}
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-600">
                 Member since {new Date(customer.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
               </p>
             </div>
@@ -146,29 +146,29 @@ export default function CustomerDetailPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Mail size={16} className="text-gray-400 flex-shrink-0" />
-              <span className="text-sm text-gray-700">{customer.email}</span>
+              <Mail size={16} className="text-gray-500 flex-shrink-0" />
+              <span className="text-sm text-gray-800">{customer.email}</span>
             </div>
             <div className="flex items-center gap-3">
-              <Phone size={16} className="text-gray-400 flex-shrink-0" />
+              <Phone size={16} className="text-gray-500 flex-shrink-0" />
               {editing ? (
                 <input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  className="text-sm text-gray-700 px-2 py-1 border border-gray-200 rounded focus:outline-none focus:border-rose-gold" placeholder="Phone" />
+                  className="text-sm text-gray-800 px-2 py-1 border border-gray-200 rounded focus:outline-none focus:border-rose-gold" placeholder="Phone" />
               ) : (
-                <span className="text-sm text-gray-700">{customer.phone || "Not provided"}</span>
+                <span className="text-sm text-gray-800">{customer.phone || "Not provided"}</span>
               )}
             </div>
             <div className="flex items-center gap-3">
-              <User size={16} className="text-gray-400 flex-shrink-0" />
-              <span className="text-sm text-gray-700 capitalize">{customer.gender || "Not set"}</span>
+              <User size={16} className="text-gray-500 flex-shrink-0" />
+              <span className="text-sm text-gray-800 capitalize">{customer.gender || "Not set"}</span>
             </div>
             <div className="flex items-center gap-3">
-              <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+              <MapPin size={16} className="text-gray-500 flex-shrink-0" />
               {editing ? (
                 <input value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                  className="text-sm text-gray-700 px-2 py-1 border border-gray-200 rounded focus:outline-none focus:border-rose-gold" placeholder="Address" />
+                  className="text-sm text-gray-800 px-2 py-1 border border-gray-200 rounded focus:outline-none focus:border-rose-gold" placeholder="Address" />
               ) : (
-                <span className="text-sm text-gray-700">{customer.address || "Not provided"}</span>
+                <span className="text-sm text-gray-800">{customer.address || "Not provided"}</span>
               )}
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function CustomerDetailPage() {
                 <div key={s.label} className="bg-gray-50 rounded-lg p-4 text-center">
                   <Icon size={18} className="text-rose-gold mx-auto mb-2" />
                   <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                  <p className="text-xs text-gray-500">{s.label}</p>
+                  <p className="text-xs text-gray-600">{s.label}</p>
                 </div>
               );
             })}
@@ -196,7 +196,7 @@ export default function CustomerDetailPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                 <th className="px-5 py-3">Service</th>
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Time</th>
@@ -206,21 +206,21 @@ export default function CustomerDetailPage() {
             </thead>
             <tbody>
               {bookings.length === 0 ? (
-                <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400">No bookings yet</td></tr>
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-500">No bookings yet</td></tr>
               ) : (
                 bookings.map((b) => (
                   <tr key={b._id} className="border-b border-gray-100 last:border-0">
                     <td className="px-5 py-3 text-gray-900">{b.services?.map((s) => s.name).join(", ") || "—"}</td>
-                    <td className="px-5 py-3 text-gray-600 whitespace-nowrap">
+                    <td className="px-5 py-3 text-gray-700 whitespace-nowrap">
                       {new Date(b.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
-                    <td className="px-5 py-3 text-gray-600">{b.timeSlot}</td>
+                    <td className="px-5 py-3 text-gray-700">{b.timeSlot}</td>
                     <td className="px-5 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || "bg-gray-100 text-gray-600"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || "bg-gray-100 text-gray-700"}`}>
                         {b.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-700">{b.finalAmount ? `₹${b.finalAmount.toLocaleString("en-IN")}` : "—"}</td>
+                    <td className="px-5 py-3 text-gray-800">{b.finalAmount ? `₹${b.finalAmount.toLocaleString("en-IN")}` : "—"}</td>
                   </tr>
                 ))
               )}
@@ -237,7 +237,7 @@ export default function CustomerDetailPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Amount</th>
                 <th className="px-5 py-3">Method</th>
@@ -246,18 +246,18 @@ export default function CustomerDetailPage() {
             </thead>
             <tbody>
               {payments.length === 0 ? (
-                <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400">No payments yet</td></tr>
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-500">No payments yet</td></tr>
               ) : (
                 payments.map((p) => (
                   <tr key={p._id} className="border-b border-gray-100 last:border-0">
-                    <td className="px-5 py-3 text-gray-600 whitespace-nowrap">
+                    <td className="px-5 py-3 text-gray-700 whitespace-nowrap">
                       {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
                     <td className="px-5 py-3 text-gray-900 font-medium">₹{p.amount?.toLocaleString("en-IN")}</td>
-                    <td className="px-5 py-3 text-gray-600 capitalize">{p.method}</td>
+                    <td className="px-5 py-3 text-gray-700 capitalize">{p.method}</td>
                     <td className="px-5 py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                        p.status === "completed" ? "bg-green-50 text-green-700" : p.status === "refunded" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-600"
+                        p.status === "completed" ? "bg-green-50 text-green-700" : p.status === "refunded" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-700"
                       }`}>
                         {p.status}
                       </span>

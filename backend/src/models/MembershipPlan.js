@@ -42,7 +42,7 @@ const membershipPlanSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
       },
     ],
-    loyaltyPointsMultiplier: {
+    superCoinsMultiplier: {
       type: Number,
       default: 1,
     },

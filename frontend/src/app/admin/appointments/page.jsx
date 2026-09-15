@@ -11,7 +11,7 @@ const statusColors = {
   "in-progress": "bg-purple-50 text-purple-700 border-purple-200",
   completed: "bg-green-50 text-green-700 border-green-200",
   cancelled: "bg-red-50 text-red-700 border-red-200",
-  "no-show": "bg-gray-50 text-gray-600 border-gray-200",
+  "no-show": "bg-gray-50 text-gray-700 border-gray-200",
 };
 
 const timeSlots = [
@@ -114,7 +114,7 @@ export default function AppointmentsPage() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage bookings and schedules</p>
+          <p className="text-sm text-gray-600 mt-1">Manage bookings and schedules</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -127,7 +127,7 @@ export default function AppointmentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             value={search}
@@ -159,13 +159,13 @@ export default function AppointmentsPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader size={20} className="animate-spin text-rose-gold" />
-            <span className="ml-2 text-sm text-gray-500">Loading...</span>
+            <span className="ml-2 text-sm text-gray-600">Loading...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                   <th className="px-5 py-3">Customer</th>
                   <th className="px-5 py-3">Service</th>
                   <th className="px-5 py-3">Date</th>
@@ -177,7 +177,7 @@ export default function AppointmentsPage() {
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
+                    <td colSpan={6} className="px-5 py-10 text-center text-gray-500">
                       No appointments found
                     </td>
                   </tr>
@@ -186,15 +186,15 @@ export default function AppointmentsPage() {
                     <tr key={a._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                       <td className="px-5 py-3">
                         <p className="font-medium text-gray-900">{a.customerName}</p>
-                        <p className="text-xs text-gray-400">{a.customerPhone}</p>
+                        <p className="text-xs text-gray-500">{a.customerPhone}</p>
                       </td>
-                      <td className="px-5 py-3 text-gray-700">
+                      <td className="px-5 py-3 text-gray-800">
                         {a.services?.map((s) => s.name).join(", ") || "—"}
                       </td>
-                      <td className="px-5 py-3 text-gray-700 whitespace-nowrap">
+                      <td className="px-5 py-3 text-gray-800 whitespace-nowrap">
                         {new Date(a.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                       </td>
-                      <td className="px-5 py-3 text-gray-700">{a.timeSlot}</td>
+                      <td className="px-5 py-3 text-gray-800">{a.timeSlot}</td>
                       <td className="px-5 py-3">
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[a.status] || statusColors.pending}`}>
                           {a.status}
@@ -222,7 +222,7 @@ export default function AppointmentsPage() {
         {/* Pagination */}
         {pagination.pages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-600">
               Page {pagination.page} of {pagination.pages} ({pagination.total} total)
             </span>
             <div className="flex gap-2">
@@ -252,39 +252,39 @@ export default function AppointmentsPage() {
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">New Appointment</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Name *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Name *</label>
                   <input required value={form.customerName} onChange={(e) => setForm({...form, customerName: e.target.value})}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Email *</label>
                   <input required type="email" value={form.customerEmail} onChange={(e) => setForm({...form, customerEmail: e.target.value})}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Phone *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Phone *</label>
                   <input required value={form.customerPhone} onChange={(e) => setForm({...form, customerPhone: e.target.value})}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Service *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Service *</label>
                   <input required value={form.services} onChange={(e) => setForm({...form, services: e.target.value})} placeholder="e.g. Haircut & Styling"
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Date *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Date *</label>
                   <input required type="date" value={form.date} onChange={(e) => setForm({...form, date: e.target.value})}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Time *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Time *</label>
                   <select required value={form.timeSlot} onChange={(e) => setForm({...form, timeSlot: e.target.value})}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
                     <option value="">Select time</option>
@@ -293,13 +293,13 @@ export default function AppointmentsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Notes</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Notes</label>
                 <textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} rows={3}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold resize-none" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
                 <button type="submit" disabled={creating}

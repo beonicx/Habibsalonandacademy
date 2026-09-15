@@ -24,7 +24,7 @@ const navItems = [
   { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/contacts", label: "Messages", icon: MessageSquare },
   { href: "/admin/memberships", label: "Memberships", icon: Crown },
-  { href: "/admin/loyalty", label: "Loyalty", icon: Star },
+  { href: "/admin/supercoins", label: "SuperCoins", icon: Star },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
 ];
 
@@ -158,11 +158,11 @@ function AdminShell({ children }) {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-600 hover:text-gray-900"
+              className="lg:hidden text-gray-700 hover:text-gray-900"
             >
               <Menu size={22} />
             </button>
-            <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-500">
+            <nav className="hidden sm:flex items-center gap-1 text-sm text-gray-600">
               <Link href="/admin" className="hover:text-gray-900">Admin</Link>
               {crumbs.map((crumb, i) => (
                 <span key={i} className="flex items-center gap-1">
@@ -176,13 +176,13 @@ function AdminShell({ children }) {
           </div>
           <div className="flex items-center gap-3">
             {admin && (
-              <span className="hidden sm:block text-sm text-gray-600">
+              <span className="hidden sm:block text-sm text-gray-700">
                 {admin.name}
               </span>
             )}
             <button
               onClick={logout}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-red-600 transition-colors"
             >
               <LogOut size={16} />
               <span className="hidden sm:inline">Logout</span>

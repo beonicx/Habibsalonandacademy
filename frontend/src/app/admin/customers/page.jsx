@@ -70,7 +70,7 @@ export default function CustomersPage() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your customer database</p>
+          <p className="text-sm text-gray-600 mt-1">Manage your customer database</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -83,7 +83,7 @@ export default function CustomersPage() {
       {/* Search */}
       <div className="mb-5 max-w-sm">
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             value={search}
@@ -105,26 +105,26 @@ export default function CustomersPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader size={20} className="animate-spin text-rose-gold" />
-            <span className="ml-2 text-sm text-gray-500">Loading...</span>
+            <span className="ml-2 text-sm text-gray-600">Loading...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                   <th className="px-5 py-3">Name</th>
                   <th className="px-5 py-3">Email</th>
                   <th className="px-5 py-3">Phone</th>
                   <th className="px-5 py-3">Visits</th>
                   <th className="px-5 py-3">Total Spent</th>
-                  <th className="px-5 py-3">Loyalty Pts</th>
+                  <th className="px-5 py-3">SuperCoins</th>
                   <th className="px-5 py-3">Joined</th>
                 </tr>
               </thead>
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-gray-400">
+                    <td colSpan={7} className="px-5 py-10 text-center text-gray-500">
                       No customers found
                     </td>
                   </tr>
@@ -143,12 +143,12 @@ export default function CustomersPage() {
                           <span className="font-medium text-gray-900">{c.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-gray-600">{c.email}</td>
-                      <td className="px-5 py-3 text-gray-600">{c.phone || "—"}</td>
-                      <td className="px-5 py-3 text-gray-700">{c.visitCount || 0}</td>
-                      <td className="px-5 py-3 text-gray-700">₹{(c.totalSpent || 0).toLocaleString("en-IN")}</td>
-                      <td className="px-5 py-3 text-gray-700">{c.loyaltyPoints || 0}</td>
-                      <td className="px-5 py-3 text-gray-500 whitespace-nowrap">
+                      <td className="px-5 py-3 text-gray-700">{c.email}</td>
+                      <td className="px-5 py-3 text-gray-700">{c.phone || "—"}</td>
+                      <td className="px-5 py-3 text-gray-800">{c.visitCount || 0}</td>
+                      <td className="px-5 py-3 text-gray-800">₹{(c.totalSpent || 0).toLocaleString("en-IN")}</td>
+                      <td className="px-5 py-3 text-gray-800">{c.superCoins || 0}</td>
+                      <td className="px-5 py-3 text-gray-600 whitespace-nowrap">
                         {new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                       </td>
                     </tr>
@@ -161,7 +161,7 @@ export default function CustomersPage() {
 
         {pagination.pages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-600">
               Page {pagination.page} of {pagination.pages} ({pagination.total} total)
             </span>
             <div className="flex gap-2">
@@ -191,28 +191,28 @@ export default function CustomersPage() {
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">Add Customer</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Name *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Name *</label>
                 <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Email *</label>
                 <input required type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Phone</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Phone</label>
                 <input value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Gender</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Gender</label>
                 <select value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
                   <option value="">Select</option>
@@ -222,13 +222,13 @@ export default function CustomersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Address</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Address</label>
                 <input value={form.address} onChange={(e) => setForm({...form, address: e.target.value})}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
-                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
                 <button type="submit" disabled={creating}

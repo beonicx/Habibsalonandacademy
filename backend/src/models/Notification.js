@@ -16,7 +16,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["booking", "payment", "promotion", "membership", "loyalty", "system"],
+      enum: ["booking", "payment", "promotion", "membership", "supercoins", "system"],
       default: "system",
     },
     channel: {

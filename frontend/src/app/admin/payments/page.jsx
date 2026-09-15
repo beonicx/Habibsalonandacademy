@@ -6,7 +6,7 @@ import { payments } from "../../../lib/adminApi";
 const statusColors = {
   completed: "bg-green-50 text-green-700",
   pending: "bg-yellow-50 text-yellow-700",
-  failed: "bg-gray-100 text-gray-600",
+  failed: "bg-gray-100 text-gray-700",
   refunded: "bg-red-50 text-red-700",
   "partially-refunded": "bg-orange-50 text-orange-700",
 };
@@ -122,7 +122,7 @@ export default function PaymentsPage() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage all transactions</p>
+          <p className="text-sm text-gray-600 mt-1">Track and manage all transactions</p>
         </div>
         <button
           onClick={() => setModal("create")}
@@ -167,7 +167,7 @@ export default function PaymentsPage() {
         {(statusFilter || methodFilter) && (
           <button
             onClick={() => { setStatusFilter(""); setMethodFilter(""); setPage(1); }}
-            className="text-xs text-gray-500 hover:text-gray-700 underline"
+            className="text-xs text-gray-600 hover:text-gray-800 underline"
           >
             Clear filters
           </button>
@@ -181,12 +181,12 @@ export default function PaymentsPage() {
             <Loader size={24} className="text-[#C9956B] animate-spin" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">No payments found</div>
+          <div className="text-center py-16 text-gray-600">No payments found</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-left text-xs text-gray-600 uppercase tracking-wider border-b border-gray-100">
                   <th className="px-5 py-3 font-medium">Date</th>
                   <th className="px-5 py-3 font-medium">Customer</th>
                   <th className="px-5 py-3 font-medium">Amount (₹)</th>
@@ -199,25 +199,25 @@ export default function PaymentsPage() {
               <tbody>
                 {items.map((pay) => (
                   <tr key={pay._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                    <td className="px-5 py-3 text-gray-700 whitespace-nowrap">{fmtDateTime(pay.createdAt)}</td>
+                    <td className="px-5 py-3 text-gray-800 whitespace-nowrap">{fmtDateTime(pay.createdAt)}</td>
                     <td className="px-5 py-3">
                       <p className="font-medium text-gray-900">
                         {pay.user?.name || pay.booking?.customerName || "—"}
                       </p>
-                      {pay.user?.email && <p className="text-xs text-gray-400">{pay.user.email}</p>}
+                      {pay.user?.email && <p className="text-xs text-gray-500">{pay.user.email}</p>}
                     </td>
                     <td className="px-5 py-3 font-medium text-gray-900">₹{pay.amount}</td>
                     <td className="px-5 py-3">
-                      <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                         {methodLabels[pay.method] || pay.method}
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[pay.status] || "bg-gray-100 text-gray-600"}`}>
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[pay.status] || "bg-gray-100 text-gray-700"}`}>
                         {pay.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-500 font-mono text-xs">{pay.transactionId || "—"}</td>
+                    <td className="px-5 py-3 text-gray-600 font-mono text-xs">{pay.transactionId || "—"}</td>
                     <td className="px-5 py-3 text-right">
                       {pay.status === "completed" && (
                         <button
@@ -236,7 +236,7 @@ export default function PaymentsPage() {
         )}
 
         {pagination.pages > 1 && (
-          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
             <span>Page {pagination.page} of {pagination.pages} ({pagination.total} items)</span>
             <div className="flex gap-2">
               <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-40">Prev</button>
@@ -257,11 +257,11 @@ export default function PaymentsPage() {
             <form onSubmit={handleCreate} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Amount (₹) *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Amount (₹) *</label>
                   <input type="number" min="0" required value={createForm.amount} onChange={(e) => setCreateForm({ ...createForm, amount: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Method *</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Method *</label>
                   <select value={createForm.method} onChange={(e) => setCreateForm({ ...createForm, method: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]">
                     <option value="cash">Cash</option>
                     <option value="card">Card</option>
@@ -272,19 +272,19 @@ export default function PaymentsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Booking ID</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Booking ID</label>
                 <input value={createForm.bookingId} onChange={(e) => setCreateForm({ ...createForm, bookingId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="Optional" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">User ID</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">User ID</label>
                 <input value={createForm.userId} onChange={(e) => setCreateForm({ ...createForm, userId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="Optional" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Transaction ID</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Transaction ID</label>
                 <input value={createForm.transactionId} onChange={(e) => setCreateForm({ ...createForm, transactionId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="Optional" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Notes</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Notes</label>
                 <textarea value={createForm.notes} onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B] resize-none" />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -308,11 +308,11 @@ export default function PaymentsPage() {
             </div>
             <form onSubmit={handleRefund} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Refund Amount (₹) *</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Refund Amount (₹) *</label>
                 <input type="number" min="0" required value={refundForm.amount} onChange={(e) => setRefundForm({ ...refundForm, amount: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Reason</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Reason</label>
                 <textarea value={refundForm.reason} onChange={(e) => setRefundForm({ ...refundForm, reason: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B] resize-none" placeholder="Reason for refund" />
               </div>
               <div className="flex justify-end gap-2 pt-2">

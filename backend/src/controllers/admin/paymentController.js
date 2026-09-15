@@ -1,7 +1,7 @@
 const Payment = require("../../models/Payment");
 const Booking = require("../../models/Booking");
 const User = require("../../models/User");
-const LoyaltyTransaction = require("../../models/LoyaltyTransaction");
+const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 const Notification = require("../../models/Notification");
 
 async function getAllPayments(req, res) {
@@ -99,26 +99,26 @@ async function createPayment(req, res) {
       if (pointsEarned > 0) {
         const user = await User.findByIdAndUpdate(
           userId,
-          { $inc: { loyaltyPoints: pointsEarned } },
+          { $inc: { superCoins: pointsEarned } },
           { new: true }
         );
 
-        await LoyaltyTransaction.create({
+        await SuperCoinTransaction.create({
           user: userId,
           points: pointsEarned,
           type: "earned",
           source: "booking",
           referenceId: payment._id,
           referenceModel: "Payment",
-          description: `Earned ${pointsEarned} points for payment of ${amount}`,
-          balanceAfter: user.loyaltyPoints,
+          description: `Earned ${pointsEarned} SuperCoins for payment of ${amount}`,
+          balanceAfter: user.superCoins,
         });
       }
 
       await Notification.create({
         user: userId,
         title: "Payment Received",
-        message: `Payment of ${amount} received via ${method}. ${pointsEarned > 0 ? `You earned ${pointsEarned} loyalty points!` : ""}`,
+        message: `Payment of ${amount} received via ${method}. ${pointsEarned > 0 ? `You earned ${pointsEarned} SuperCoins!` : ""}`,
         type: "payment",
       });
     }

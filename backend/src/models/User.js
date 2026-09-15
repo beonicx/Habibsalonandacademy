@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    loyaltyPoints: {
+    superCoins: {
       type: Number,
       default: 0,
     },

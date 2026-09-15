@@ -131,7 +131,7 @@ export default function ServicesPage() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Services</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your salon service catalogue</p>
+          <p className="text-sm text-gray-600 mt-1">Manage your salon service catalogue</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -165,8 +165,8 @@ export default function ServicesPage() {
         </div>
       ) : raw.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-          <Loader size={32} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No services yet. Click "Seed Defaults" to populate or add one manually.</p>
+          <Loader size={32} className="text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-600">No services yet. Click "Seed Defaults" to populate or add one manually.</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -176,7 +176,7 @@ export default function ServicesPage() {
                 <div>
                   <h2 className="font-semibold text-gray-900">{cat.category}</h2>
                   {cat.description && (
-                    <p className="text-xs text-gray-500 mt-0.5">{cat.description}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">{cat.description}</p>
                   )}
                 </div>
                 <button
@@ -189,7 +189,7 @@ export default function ServicesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-left text-xs text-gray-600 uppercase tracking-wider border-b border-gray-100">
                       <th className="px-5 py-3 font-medium">Name</th>
                       <th className="px-5 py-3 font-medium">Price (₹)</th>
                       <th className="px-5 py-3 font-medium">Duration</th>
@@ -203,17 +203,17 @@ export default function ServicesPage() {
                         <td className="px-5 py-3">
                           <p className="font-medium text-gray-900">{svc.name}</p>
                           {svc.description && (
-                            <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{svc.description}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{svc.description}</p>
                           )}
                         </td>
-                        <td className="px-5 py-3 text-gray-700">₹{svc.price}</td>
-                        <td className="px-5 py-3 text-gray-700">{svc.duration} min</td>
+                        <td className="px-5 py-3 text-gray-800">₹{svc.price}</td>
+                        <td className="px-5 py-3 text-gray-800">{svc.duration} min</td>
                         <td className="px-5 py-3">
                           <button onClick={() => toggleActive(svc)} title="Toggle active">
                             {svc.isActive ? (
                               <ToggleRight size={22} className="text-green-500" />
                             ) : (
-                              <ToggleLeft size={22} className="text-gray-300" />
+                              <ToggleLeft size={22} className="text-gray-500" />
                             )}
                           </button>
                         </td>
@@ -221,13 +221,13 @@ export default function ServicesPage() {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => openEdit(svc)}
-                              className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                              className="p-1.5 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-800"
                             >
                               <Edit3 size={14} />
                             </button>
                             <button
                               onClick={() => handleDelete(svc._id)}
-                              className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600"
+                              className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -256,29 +256,29 @@ export default function ServicesPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Category</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Category</label>
                   <input name="category" value={form.category} onChange={change} required className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="e.g. Hair" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Category Slug</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Category Slug</label>
                   <input name="categorySlug" value={form.categorySlug} onChange={change} required className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="e.g. hair" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Service Name</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Service Name</label>
                 <input name="name" value={form.name} onChange={change} required className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="e.g. Haircut & Styling" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Description</label>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Description</label>
                 <input name="description" value={form.description} onChange={change} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="Short description" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Price (₹)</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Price (₹)</label>
                   <input name="price" type="number" min="0" value={form.price} onChange={change} required className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration (min)</label>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Duration (min)</label>
                   <input name="duration" type="number" min="0" value={form.duration} onChange={change} required className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
                 </div>
               </div>

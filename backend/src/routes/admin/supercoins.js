@@ -6,7 +6,7 @@ const {
   addPoints,
   redeemPoints,
   getLeaderboard,
-} = require("../../controllers/admin/loyaltyController");
+} = require("../../controllers/admin/superCoinsController");
 
 router.get("/transactions", getTransactions);
 router.get("/leaderboard", getLeaderboard);

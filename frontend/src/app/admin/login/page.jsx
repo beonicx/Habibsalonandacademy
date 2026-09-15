@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1.5">
               Email
             </label>
             <input
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1.5">
               Password
             </label>
             <input
