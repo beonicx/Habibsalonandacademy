@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../../models/User");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function generateAccessToken(user) {
   return jwt.sign(
@@ -124,4 +127,51 @@ async function updateProfile(req, res) {
   }
 }
 
-module.exports = { register, login, refreshToken, getProfile, updateProfile };
+async function googleAuth(req, res) {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: "Google credential is required" });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({
+      $or: [{ googleId }, { email }],
+    });
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.authProvider = "google";
+        if (picture && !user.profileImage) user.profileImage = picture;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        authProvider: "google",
+        profileImage: picture || "",
+      });
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    res.json({ user, accessToken, refreshToken });
+  } catch (err) {
+    console.error("Google auth error:", err);
+    res.status(401).json({ error: "Google authentication failed" });
+  }
+}
+
+module.exports = { register, login, refreshToken, getProfile, updateProfile, googleAuth };

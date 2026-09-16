@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import { AuthProvider } from "../context/AuthContext";
+import GoogleAuthWrapper from "../components/providers/GoogleAuthWrapper";
 
 export const metadata = {
   metadataBase: new URL("https://habibsalonacademy.com"),
@@ -17,9 +18,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-cream">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <GoogleAuthWrapper>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </GoogleAuthWrapper>
       </body>
     </html>
   );

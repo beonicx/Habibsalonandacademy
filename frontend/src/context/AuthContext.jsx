@@ -100,6 +100,21 @@ export function AuthProvider({ children }) {
     return data;
   }
 
+  async function googleLogin(credential) {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Google login failed");
+    setUser(data.user);
+    setToken(data.accessToken);
+    localStorage.setItem("auth_token", data.accessToken);
+    localStorage.setItem("auth_user", JSON.stringify(data.user));
+    return data;
+  }
+
   function logout() {
     clearAuth();
   }
@@ -118,7 +133,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, register, logout, updateProfile, authFetch }}
+      value={{ user, token, loading, login, register, googleLogin, logout, updateProfile, authFetch }}
     >
       {children}
     </AuthContext.Provider>

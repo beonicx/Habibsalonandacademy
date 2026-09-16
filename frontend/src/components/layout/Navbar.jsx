@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -20,7 +21,7 @@ export default function Navbar() {
   const [authMode, setAuthMode] = useState("login");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, loading, login, register, logout } = useAuth();
+  const { user, loading, login, register, googleLogin, logout } = useAuth();
   const profileRef = useRef(null);
   const router = useRouter();
 
@@ -366,19 +367,34 @@ export default function Navbar() {
           onClose={() => setShowAuthModal(false)}
           login={login}
           register={register}
+          googleLogin={googleLogin}
         />
       )}
     </>
   );
 }
 
-function AuthModal({ mode, setMode, onClose, login, register }) {
+function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  async function handleGoogleSuccess(credentialResponse) {
+    setError("");
+    setSubmitting(true);
+    try {
+      await googleLogin(credentialResponse.credential);
+      onClose();
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -435,6 +451,24 @@ function AuthModal({ mode, setMode, onClose, login, register }) {
               {error}
             </div>
           )}
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google sign-in failed. Please try again.")}
+              text={mode === "login" ? "signin_with" : "signup_with"}
+              shape="rectangular"
+              size="large"
+              width="100%"
+              theme="outline"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-champagne" />
+            <span className="font-sans text-xs text-mocha/60 uppercase tracking-widest">or</span>
+            <div className="flex-1 h-px bg-champagne" />
+          </div>
 
           {mode === "register" && (
             <div>
