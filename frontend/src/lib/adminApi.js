@@ -28,6 +28,7 @@ async function adminFetch(path, options = {}) {
 }
 
 function qs(params) {
+  if (!params) return "";
   const p = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null && v !== "") p.append(k, v);
