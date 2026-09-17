@@ -1,6 +1,23 @@
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
+const nodemailer = require("nodemailer");
 const User = require("../../models/User");
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+const PASSWORD_RULES = "Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number and 1 special character";
+
+function getMailTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -174,4 +191,123 @@ async function googleAuth(req, res) {
   }
 }
 
-module.exports = { register, login, refreshToken, getProfile, updateProfile, googleAuth };
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ message: "If this email exists, an OTP has been sent" });
+    }
+
+    if (user.authProvider === "google" && !user.password) {
+      return res.status(400).json({ error: "This account uses Google sign-in. Please login with Google." });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.passwordResetOtp = otp;
+    user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    try {
+      const transporter = getMailTransporter();
+      await transporter.sendMail({
+        from: `"Habib Salon & Academy" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Password Reset OTP",
+        html: `
+          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+            <h2 style="color: #3B2F2F;">Password Reset</h2>
+            <p>Your OTP for password reset is:</p>
+            <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; padding: 16px; background: #f5f0eb; border-radius: 8px; color: #B76E79;">${otp}</div>
+            <p style="color: #888; font-size: 14px; margin-top: 16px;">This OTP expires in 10 minutes. If you didn't request this, please ignore this email.</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send reset email:", emailErr);
+      return res.status(500).json({ error: "Failed to send reset email. Please try again later." });
+    }
+
+    res.json({ message: "OTP sent to your email" });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: "Email, OTP and new password are required" });
+    }
+
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULES });
+    }
+
+    const user = await User.findOne({
+      email,
+      passwordResetOtp: otp,
+      passwordResetExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    user.password = newPassword;
+    user.passwordResetOtp = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
+async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current password and new password are required" });
+    }
+
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULES });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({ error: "This account uses Google sign-in. You cannot change password here." });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
+module.exports = { register, login, refreshToken, getProfile, updateProfile, googleAuth, forgotPassword, resetPassword, changePassword };

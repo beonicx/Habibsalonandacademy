@@ -1,17 +1,27 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Mail, Phone, Edit3, Check, LogOut, Calendar, Scissors, ShoppingBag, Ticket, Coins } from "lucide-react";
+import { User, Mail, Phone, Edit3, Check, LogOut, Calendar, Scissors, ShoppingBag, Ticket, Coins, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function DashboardPage() {
-  const { user, loading, logout, updateProfile } = useAuth();
+  const { user, loading, logout, updateProfile, authFetch } = useAuth();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [pwMessage, setPwMessage] = useState("");
+  const [pwError, setPwError] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -48,6 +58,55 @@ export default function DashboardPage() {
       setSaving(false);
     }
   }
+
+  const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    setPwError("");
+    setPwMessage("");
+
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      setPwError("Min 8 characters: 1 uppercase, 1 lowercase, 1 number, 1 special character");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPwError("Passwords do not match");
+      return;
+    }
+
+    setChangingPw(true);
+    try {
+      const res = await authFetch("/auth/change-password", {
+        method: "PUT",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to change password");
+      setPwMessage("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setTimeout(() => {
+        setPwMessage("");
+        setShowChangePassword(false);
+      }, 3000);
+    } catch (err) {
+      setPwError(err.message);
+    } finally {
+      setChangingPw(false);
+    }
+  }
+
+  const pwChecks = [
+    { label: "8+ chars", ok: newPassword.length >= 8 },
+    { label: "Uppercase", ok: /[A-Z]/.test(newPassword) },
+    { label: "Lowercase", ok: /[a-z]/.test(newPassword) },
+    { label: "Number", ok: /\d/.test(newPassword) },
+    { label: "Special", ok: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(newPassword) },
+  ];
+
+  const isGoogleOnly = user?.authProvider === "google" && !user?.password;
 
   function handleLogout() {
     logout();
@@ -177,6 +236,145 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Change Password */}
+        {!isGoogleOnly && (
+          <div className="bg-white rounded-lg shadow-sm border border-champagne overflow-hidden mt-6">
+            <div className="px-6 py-4 border-b border-champagne flex items-center justify-between">
+              <h2 className="font-display text-lg text-espresso flex items-center gap-2">
+                <Lock size={18} className="text-rose-gold" />
+                Change Password
+              </h2>
+              <button
+                onClick={() => {
+                  setShowChangePassword(!showChangePassword);
+                  setPwError("");
+                  setPwMessage("");
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmNewPassword("");
+                }}
+                className="font-sans text-xs tracking-widest uppercase text-rose-gold hover:text-espresso transition-colors"
+              >
+                {showChangePassword ? "Cancel" : "Change"}
+              </button>
+            </div>
+
+            {showChangePassword && (
+              <form onSubmit={handleChangePassword} className="p-6 space-y-4">
+                {pwError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
+                    {pwError}
+                  </div>
+                )}
+                {pwMessage && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-sans rounded-md px-4 py-2">
+                    {pwMessage}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                    Current Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showCurrentPw ? "text" : "password"}
+                      required
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full px-4 py-3 pr-11 bg-cream border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                      placeholder="Enter current password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPw(!showCurrentPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-mocha/50 hover:text-mocha transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPw ? "text" : "password"}
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-3 pr-11 bg-cream border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                      placeholder="Enter new password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPw(!showNewPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-mocha/50 hover:text-mocha transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {newPassword && (
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {pwChecks.map((c) => (
+                        <span
+                          key={c.label}
+                          className={`font-sans text-[10px] px-2 py-0.5 rounded-full border ${
+                            c.ok
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-gray-50 text-mocha/50 border-champagne"
+                          }`}
+                        >
+                          {c.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPw ? "text" : "password"}
+                      required
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="w-full px-4 py-3 pr-11 bg-cream border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                      placeholder="Confirm new password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPw(!showConfirmPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-mocha/50 hover:text-mocha transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {confirmNewPassword && newPassword !== confirmNewPassword && (
+                    <p className="font-sans text-xs text-red-500 mt-1">Passwords do not match</p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={changingPw}
+                  className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
+                >
+                  {changingPw ? "Changing..." : "Change Password"}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">

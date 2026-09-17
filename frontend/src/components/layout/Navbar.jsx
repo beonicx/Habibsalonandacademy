@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins } from "lucide-react";
+import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
@@ -374,13 +374,75 @@ export default function Navbar() {
   );
 }
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+const PASSWORD_RULES = "Min 8 characters: 1 uppercase, 1 lowercase, 1 number, 1 special character";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+function PasswordInput({ value, onChange, placeholder, required = true, minLength }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        required={required}
+        minLength={minLength}
+        value={value}
+        onChange={onChange}
+        className="w-full px-4 py-3 pr-11 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-mocha/50 hover:text-mocha transition-colors"
+        tabIndex={-1}
+      >
+        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
+    </div>
+  );
+}
+
+function PasswordStrength({ password }) {
+  if (!password) return null;
+  const checks = [
+    { label: "8+ characters", ok: password.length >= 8 },
+    { label: "Uppercase", ok: /[A-Z]/.test(password) },
+    { label: "Lowercase", ok: /[a-z]/.test(password) },
+    { label: "Number", ok: /\d/.test(password) },
+    { label: "Special char", ok: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password) },
+  ];
+  return (
+    <div className="flex flex-wrap gap-2 mt-1.5">
+      {checks.map((c) => (
+        <span
+          key={c.label}
+          className={`font-sans text-[10px] px-2 py-0.5 rounded-full border ${
+            c.ok
+              ? "bg-green-50 text-green-700 border-green-200"
+              : "bg-gray-50 text-mocha/50 border-champagne"
+          }`}
+        >
+          {c.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function handleGoogleSuccess(credentialResponse) {
     setError("");
@@ -401,6 +463,12 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     setError("");
     setSubmitting(true);
 
+    if (mode === "register" && !PASSWORD_REGEX.test(password)) {
+      setError(PASSWORD_RULES);
+      setSubmitting(false);
+      return;
+    }
+
     try {
       if (mode === "login") {
         await login(email, password);
@@ -416,10 +484,95 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     }
   }
 
+  async function handleForgotSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+      setSuccess("OTP sent to your email!");
+      setMode("otp");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleResetSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!PASSWORD_REGEX.test(newPassword)) {
+      setError(PASSWORD_RULES);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Reset failed");
+      setSuccess("Password reset successful! You can now sign in.");
+      setMode("login");
+      setOtp("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   function switchMode() {
     setMode(mode === "login" ? "register" : "login");
     setError("");
+    setSuccess("");
   }
+
+  function goToForgot() {
+    setForgotEmail(email || "");
+    setMode("forgot");
+    setError("");
+    setSuccess("");
+  }
+
+  function backToLogin() {
+    setMode("login");
+    setError("");
+    setSuccess("");
+  }
+
+  const isForgotFlow = mode === "forgot" || mode === "otp";
+  const modalTitle = {
+    login: "Welcome Back",
+    register: "Join Us",
+    forgot: "Forgot Password",
+    otp: "Reset Password",
+  }[mode];
+  const modalSubtitle = {
+    login: "Sign in to your account",
+    register: "Create your account",
+    forgot: "Enter your email to receive an OTP",
+    otp: "Enter the OTP and your new password",
+  }[mode];
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -430,131 +583,248 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
       <div className="relative bg-cream rounded-lg shadow-2xl w-full max-w-md animate-fade-up overflow-hidden max-h-[calc(100vh-2rem)] overflow-y-auto">
         {/* Header */}
         <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4 text-center">
+          {isForgotFlow && (
+            <button
+              type="button"
+              onClick={backToLogin}
+              className="absolute top-4 left-4 flex items-center gap-1 font-sans text-xs text-mocha hover:text-rose-gold transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Back
+            </button>
+          )}
           <Scissors
             size={28}
             className="text-rose-gold mx-auto mb-3"
           />
           <h2 className="font-display text-xl sm:text-2xl text-espresso">
-            {mode === "login" ? "Welcome Back" : "Join Us"}
+            {modalTitle}
           </h2>
           <p className="font-sans text-sm text-mocha mt-1">
-            {mode === "login"
-              ? "Sign in to your account"
-              : "Create your account"}
+            {modalSubtitle}
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
-              {error}
-            </div>
-          )}
-
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError("Google sign-in failed. Please try again.")}
-              text={mode === "login" ? "signin_with" : "signup_with"}
-              shape="rectangular"
-              size="large"
-              width="100%"
-              theme="outline"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-champagne" />
-            <span className="font-sans text-xs text-mocha/60 uppercase tracking-widest">or</span>
-            <div className="flex-1 h-px bg-champagne" />
-          </div>
-
-          {mode === "register" && (
+        {/* Forgot Password: Email step */}
+        {mode === "forgot" && (
+          <form onSubmit={handleForgotSubmit} className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
+                {error}
+              </div>
+            )}
             <div>
               <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
-                Full Name
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                placeholder="you@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
+            >
+              {submitting ? "Sending..." : "Send OTP"}
+            </button>
+          </form>
+        )}
+
+        {/* OTP + New Password step */}
+        {mode === "otp" && (
+          <form onSubmit={handleResetSubmit} className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-sans rounded-md px-4 py-2">
+                {success}
+              </div>
+            )}
+            <div>
+              <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                OTP Code
               </label>
               <input
                 type="text"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
-                placeholder="Your name"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors tracking-[0.3em] text-center"
+                placeholder="Enter 6-digit OTP"
               />
             </div>
-          )}
-
-          <div>
-            <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
-              placeholder="Min 6 characters"
-            />
-          </div>
-
-          {mode === "register" && (
             <div>
               <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
-                Phone <span className="normal-case tracking-normal">(optional)</span>
+                New Password
               </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
-                placeholder="Your phone number"
+              <PasswordInput
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password"
+              />
+              <PasswordStrength password={newPassword} />
+            </div>
+            <div>
+              <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                Confirm Password
+              </label>
+              <PasswordInput
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="font-sans text-xs text-red-500 mt-1">Passwords do not match</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
+            >
+              {submitting ? "Resetting..." : "Reset Password"}
+            </button>
+          </form>
+        )}
+
+        {/* Login / Register form */}
+        {(mode === "login" || mode === "register") && (
+          <form onSubmit={handleSubmit} className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-sans rounded-md px-4 py-2">
+                {success}
+              </div>
+            )}
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google sign-in failed. Please try again.")}
+                text={mode === "login" ? "signin_with" : "signup_with"}
+                shape="rectangular"
+                size="large"
+                width="100%"
+                theme="outline"
               />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
-          >
-            {submitting
-              ? "Please wait..."
-              : mode === "login"
-              ? "Sign In"
-              : "Create Account"}
-          </button>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-champagne" />
+              <span className="font-sans text-xs text-mocha/60 uppercase tracking-widest">or</span>
+              <div className="flex-1 h-px bg-champagne" />
+            </div>
 
-          <p className="text-center font-sans text-sm text-mocha">
-            {mode === "login"
-              ? "Don't have an account? "
-              : "Already have an account? "}
+            {mode === "register" && (
+              <div>
+                <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                  placeholder="Your name"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                Password
+              </label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === "register" ? "Min 8 characters" : "Your password"}
+                minLength={mode === "register" ? 8 : 1}
+              />
+              {mode === "register" && <PasswordStrength password={password} />}
+            </div>
+
+            {mode === "login" && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={goToForgot}
+                  className="font-sans text-xs text-rose-gold hover:text-espresso transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
+            {mode === "register" && (
+              <div>
+                <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                  Phone <span className="normal-case tracking-normal">(optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors"
+                  placeholder="Your phone number"
+                />
+              </div>
+            )}
+
             <button
-              type="button"
-              onClick={switchMode}
-              className="text-rose-gold hover:text-espresso font-medium transition-colors"
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
             >
-              {mode === "login" ? "Register" : "Sign In"}
+              {submitting
+                ? "Please wait..."
+                : mode === "login"
+                ? "Sign In"
+                : "Create Account"}
             </button>
-          </p>
-        </form>
+
+            <p className="text-center font-sans text-sm text-mocha">
+              {mode === "login"
+                ? "Don't have an account? "
+                : "Already have an account? "}
+              <button
+                type="button"
+                onClick={switchMode}
+                className="text-rose-gold hover:text-espresso font-medium transition-colors"
+              >
+                {mode === "login" ? "Register" : "Sign In"}
+              </button>
+            </p>
+          </form>
+        )}
 
         {/* Close button */}
         <button

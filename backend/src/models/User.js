@@ -77,6 +77,8 @@ const userSchema = new mongoose.Schema(
       ref: "User",
     },
     tags: [String],
+    passwordResetOtp: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );
