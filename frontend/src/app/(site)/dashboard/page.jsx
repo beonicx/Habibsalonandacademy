@@ -22,12 +22,23 @@ export default function DashboardPage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [coinBalance, setCoinBalance] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user || !authFetch) return;
+    authFetch("/supercoins/my")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setCoinBalance(data.data.balance);
+      })
+      .catch(() => {});
+  }, [user, authFetch]);
 
   useEffect(() => {
     if (user) {
@@ -373,6 +384,32 @@ export default function DashboardPage() {
                 </button>
               </form>
             )}
+          </div>
+        )}
+
+        {/* SuperCoins Balance Card */}
+        {coinBalance !== null && (
+          <div className="bg-gradient-to-r from-rose-gold to-rose-dark rounded-lg p-6 text-cream mt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-sans text-xs uppercase tracking-widest opacity-80 mb-1">
+                  SuperCoins Balance
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-4xl">{coinBalance}</span>
+                  <span className="font-sans text-sm opacity-80">coins</span>
+                </div>
+                <p className="font-sans text-xs mt-2 opacity-70">
+                  Worth ₹{(coinBalance * 0.5).toFixed(0)} in discounts
+                </p>
+              </div>
+              <a
+                href="/supercoins"
+                className="bg-cream/20 hover:bg-cream/30 transition-colors rounded-md px-4 py-2 font-sans text-xs tracking-widest uppercase"
+              >
+                View Details
+              </a>
+            </div>
           </div>
         )}
 

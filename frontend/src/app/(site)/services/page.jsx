@@ -1,5 +1,8 @@
+"use client";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -99,39 +102,86 @@ const staticServices = [
   },
 ];
 
-async function getServices() {
-  try {
-    const res = await fetch(`${API_BASE}/services`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (!json.success || !json.data?.length) return null;
-    return json.data.map((cat) => ({
-      id: cat.slug,
-      category: cat.category,
-      icon: iconMap[cat.slug] || "✂️",
-      description: cat.description,
-      items: cat.items.map((item) => ({
-        name: item.name,
-        price: item.price,
-        duration: typeof item.duration === "number" ? formatDuration(item.duration) : item.duration,
-        description: item.description,
-      })),
-    }));
-  } catch {
-    return null;
-  }
+function HighlightText({ text, query }) {
+  if (!query) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="bg-rose-gold/20 text-espresso rounded px-0.5">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
 }
 
-export const metadata = {
-  title: "Services | Habib Salon & Academy",
-  description: "Explore our full range of hair, skin, makeup, nail and spa services.",
-};
+export default function ServicesPage() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
+  const [services, setServices] = useState(staticServices);
+  const [loadedFromApi, setLoadedFromApi] = useState(false);
 
-export default async function ServicesPage() {
-  const apiServices = await getServices();
-  const services = apiServices || staticServices;
+  useEffect(() => {
+    setSearchQuery(urlSearch);
+  }, [urlSearch]);
+
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        const res = await fetch(`${API_BASE}/services`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.success && json.data?.length > 0) {
+          const mapped = json.data.map((cat) => ({
+            id: cat.slug,
+            category: cat.category,
+            icon: iconMap[cat.slug] || "✂️",
+            description: cat.description,
+            items: cat.items.map((item) => ({
+              name: item.name,
+              price: item.price,
+              duration: typeof item.duration === "number" ? formatDuration(item.duration) : item.duration,
+              description: item.description,
+            })),
+          }));
+          setServices(mapped);
+          setLoadedFromApi(true);
+        }
+      } catch {
+        // keep static fallback
+      }
+    }
+    loadServices();
+  }, []);
+
+  const query = searchQuery.trim().toLowerCase();
+
+  const filteredServices = useMemo(() => {
+    if (!query) return services;
+
+    return services
+      .map((cat) => {
+        const categoryMatch =
+          cat.category.toLowerCase().includes(query) ||
+          cat.description?.toLowerCase().includes(query);
+
+        const matchingItems = cat.items.filter(
+          (item) =>
+            item.name.toLowerCase().includes(query) ||
+            item.description?.toLowerCase().includes(query)
+        );
+
+        if (categoryMatch) return cat;
+        if (matchingItems.length > 0) return { ...cat, items: matchingItems };
+        return null;
+      })
+      .filter(Boolean);
+  }, [services, query]);
+
+  const totalResults = filteredServices.reduce((sum, cat) => sum + cat.items.length, 0);
 
   return (
     <div className="pt-24">
@@ -144,16 +194,81 @@ export default async function ServicesPage() {
           Every service at Habib's begins with a personal consultation. Because you deserve beauty
           that's truly yours.
         </p>
+
+        {/* Search Bar */}
+        <div className="max-w-lg mx-auto mt-8">
+          <div className="relative">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/40" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search services... e.g. facial, haircut, massage"
+              className="w-full pl-11 pr-10 py-3.5 bg-cream/10 border border-cream/20 rounded-md font-sans text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:border-rose-gold focus:bg-cream/15 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 hover:text-cream transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-20">
+        {/* Search Results Info */}
+        {query && (
+          <div className="mb-10 flex items-center justify-between">
+            <p className="font-sans text-sm text-mocha">
+              {totalResults > 0 ? (
+                <>
+                  Found <span className="font-medium text-espresso">{totalResults}</span> service{totalResults !== 1 ? "s" : ""} matching "<span className="font-medium text-rose-gold">{searchQuery}</span>"
+                </>
+              ) : (
+                <>
+                  No services found for "<span className="font-medium text-rose-gold">{searchQuery}</span>"
+                </>
+              )}
+            </p>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="font-sans text-xs tracking-widest uppercase text-rose-gold hover:text-espresso transition-colors"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
+
+        {/* No Results */}
+        {query && filteredServices.length === 0 && (
+          <div className="text-center py-20">
+            <Search size={48} className="text-champagne mx-auto mb-4" />
+            <h2 className="font-display text-2xl text-espresso mb-2">No services found</h2>
+            <p className="font-body text-mocha mb-6">
+              Try a different search term or browse all our services below.
+            </p>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="inline-flex items-center gap-2 bg-rose-gold text-cream px-6 py-3 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso"
+            >
+              View All Services
+            </button>
+          </div>
+        )}
+
+        {/* Service Categories */}
         <div className="space-y-20">
-          {services.map((cat) => (
+          {filteredServices.map((cat) => (
             <div key={cat.id} id={cat.id} className="scroll-mt-24">
               <div className="flex items-center gap-4 mb-8 pb-4 border-b border-champagne">
                 <span className="text-3xl">{cat.icon}</span>
                 <div>
-                  <h2 className="font-display text-3xl text-espresso">{cat.category}</h2>
+                  <h2 className="font-display text-3xl text-espresso">
+                    <HighlightText text={cat.category} query={query} />
+                  </h2>
                   <p className="font-body text-mocha text-sm">{cat.description}</p>
                 </div>
               </div>
@@ -166,16 +281,26 @@ export default async function ServicesPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-display text-xl text-espresso group-hover:text-rose-gold transition-colors duration-300">
-                        {item.name}
+                        <HighlightText text={item.name} query={query} />
                       </h3>
-                      <span className="font-sans text-lg font-semibold text-rose-gold">
+                      <span className="font-sans text-lg font-semibold text-rose-gold whitespace-nowrap ml-3">
                         ₹{item.price}
                       </span>
                     </div>
-                    <p className="font-body text-sm text-mocha/70 mb-3">{item.description}</p>
-                    <p className="font-sans text-xs text-mocha/50 tracking-wider uppercase">
-                      {item.duration}
+                    <p className="font-body text-sm text-mocha/70 mb-3">
+                      <HighlightText text={item.description} query={query} />
                     </p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-sans text-xs text-mocha/50 tracking-wider uppercase">
+                        {item.duration}
+                      </p>
+                      <Link
+                        href={`/booking?service=${encodeURIComponent(item.name)}`}
+                        className="font-sans text-xs text-rose-gold hover:text-espresso transition-colors tracking-widest uppercase"
+                      >
+                        Book Now
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>

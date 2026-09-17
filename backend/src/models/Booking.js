@@ -74,6 +74,22 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    couponCode: {
+      type: String,
+      default: "",
+    },
+    couponDiscount: {
+      type: Number,
+      default: 0,
+    },
+    superCoinsUsed: {
+      type: Number,
+      default: 0,
+    },
+    superCoinsDiscount: {
+      type: Number,
+      default: 0,
+    },
     cancellationReason: String,
     reminderSent: {
       type: Boolean,

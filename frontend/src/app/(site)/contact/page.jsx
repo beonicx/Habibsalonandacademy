@@ -45,9 +45,9 @@ export default function ContactPage() {
         <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">
           Get in Touch
         </p>
-        <h1 className="font-display text-6xl text-cream">Contact Us</h1>
+        <h1 className="font-display text-6xl text-cream">Contact Habib Salon & Academy</h1>
         <p className="font-body text-cream/60 mt-4 max-w-xl mx-auto">
-          We'd love to hear from you. Reach out for bookings, questions, or just to say hello.
+          Visit us at Mathiya (Baghi), Ghazipur or call +91 9565 459518 for appointments and enquiries.
         </p>
       </div>
 
@@ -60,24 +60,40 @@ export default function ContactPage() {
               We're Here for <em className="italic text-rose-gold">You</em>
             </h2>
 
-            <div className="space-y-6 mb-10">
-              {[
-                { icon: <MapPin size={20} />, title: "Address", content: "Mathiya (Baghi), Ghazipur\nUttar Pradesh, India" },
-                { icon: <Phone size={20} />, title: "Phone", content: "+91 9565 459518" },
-                { icon: <Mail size={20} />, title: "Email", content: "pankajyadav@habibsalonacademy.com" },
-                { icon: <Clock size={20} />, title: "Hours", content: "Mon–Sat: 9:00 AM – 8:00 PM\nSunday: 10:00 AM – 6:00 PM" },
-              ].map((item) => (
-                <div key={item.title} className="flex gap-4">
-                  <div className="text-rose-gold mt-1 shrink-0">{item.icon}</div>
-                  <div>
-                    <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">
-                      {item.title}
-                    </p>
-                    <p className="font-body text-espresso whitespace-pre-line">{item.content}</p>
-                  </div>
+            <address className="not-italic space-y-6 mb-10">
+              <div className="flex gap-4">
+                <div className="text-rose-gold mt-1 shrink-0"><MapPin size={20} /></div>
+                <div>
+                  <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Address</p>
+                  <p className="font-body text-espresso">Mathiya (Baghi), Ghazipur<br />Uttar Pradesh, India</p>
                 </div>
-              ))}
-            </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="text-rose-gold mt-1 shrink-0"><Phone size={20} /></div>
+                <div>
+                  <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Phone</p>
+                  <p className="font-body text-espresso">
+                    <a href="tel:+919565459518" className="hover:text-rose-gold transition-colors">+91 9565 459518</a>
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="text-rose-gold mt-1 shrink-0"><Mail size={20} /></div>
+                <div>
+                  <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Email</p>
+                  <p className="font-body text-espresso">
+                    <a href="mailto:pankajyadav@habibsalonacademy.com" className="hover:text-rose-gold transition-colors">pankajyadav@habibsalonacademy.com</a>
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="text-rose-gold mt-1 shrink-0"><Clock size={20} /></div>
+                <div>
+                  <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Hours</p>
+                  <p className="font-body text-espresso">Mon–Sat: 9:00 AM – 8:00 PM<br />Sunday: 10:00 AM – 6:00 PM</p>
+                </div>
+              </div>
+            </address>
 
             {/* Map placeholder */}
             <div className="w-full h-56 bg-champagne flex items-center justify-center border border-champagne">

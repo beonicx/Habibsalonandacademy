@@ -9,6 +9,8 @@ const servicesRouter = require("./routes/userapp/services");
 const bookingRouter = require("./routes/userapp/booking");
 const galleryRouter = require("./routes/userapp/gallery");
 const contactRouter = require("./routes/userapp/contact");
+const supercoinsRouter = require("./routes/userapp/supercoins");
+const couponsRouter = require("./routes/userapp/coupons");
 
 const adminRouter = require("./routes/admin");
 
@@ -51,6 +53,8 @@ app.use("/api/services", servicesRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/gallery", galleryRouter);
 app.use("/api/contact", contactRouter);
+app.use("/api/supercoins", supercoinsRouter);
+app.use("/api/coupons", couponsRouter);
 
 // Admin routes
 app.use("/api/admin", adminRouter);

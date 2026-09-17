@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Award, Heart, Leaf, Scissors, Users } from "lucide-react";
 
 export const metadata = {
-  title: "About | Habib Salon & Academy",
+  title: "About Us — Our Story, Team & Values",
+  description:
+    "Learn about Habib Salon & Academy in Ghazipur — founded in 2012, 12+ years of expertise in hair, beauty, bridal makeup & skincare. Meet our team of expert stylists.",
+  alternates: { canonical: "https://habibsalonacademy.com/about" },
 };
 
 const team = [
@@ -27,11 +30,13 @@ export default function AboutPage() {
         <div className="relative z-10 text-center text-cream max-w-3xl mx-auto px-6">
           <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-4">Our Story</p>
           <h1 className="font-display text-6xl md:text-7xl text-cream leading-tight mb-6">
-            Beauty with <em className="text-rose-gold italic">Purpose</em>
+            About Habib Salon
+            <br />
+            <em className="text-rose-gold italic">& Academy</em>
           </h1>
           <p className="font-body text-cream/70 text-lg">
-            Founded in 2012, Habib Salon & Academy was born from a simple belief: everyone deserves to
-            feel extraordinary in their own skin.
+            Founded in 2012 in Ghazipur, Habib Salon & Academy was born from a simple belief: everyone
+            deserves to feel extraordinary in their own skin.
           </p>
         </div>
       </div>
@@ -76,7 +81,7 @@ export default function AboutPage() {
             />
             <div className="absolute -bottom-6 -left-6 bg-rose-gold text-cream p-6 w-48 hidden lg:block">
               <Scissors size={28} className="mb-2" />
-              <p className="font-display text-xl">Since 2025</p>
+              <p className="font-display text-xl">Since 2012</p>
               <p className="font-sans text-xs opacity-80">Premium Salon</p>
             </div>
           </div>

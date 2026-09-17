@@ -15,5 +15,6 @@ router.use("/products", require("./products"));
 router.use("/notifications", require("./notifications"));
 router.use("/gallery", require("./gallery"));
 router.use("/contacts", require("./contacts"));
+router.use("/coupons", require("./coupons"));
 
 module.exports = router;

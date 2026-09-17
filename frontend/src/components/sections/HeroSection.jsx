@@ -45,14 +45,15 @@ export default function HeroSection() {
 
           {/* Headline */}
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-cream leading-[0.95] mb-6">
-            Where Beauty
+            Premium Salon
             <br />
-            <em className="text-rose-gold not-italic">Meets Art</em>
+            <em className="text-rose-gold not-italic">in Ghazipur</em>
           </h1>
 
           <p className="font-body text-lg text-cream/75 mb-10 leading-relaxed max-w-lg">
-            Experience transformative beauty services by our expert stylists. From precision cuts and
-            luxurious colour to revitalising spa treatments — all tailored uniquely to you.
+            Habib Salon & Academy — expert hair styling, bridal makeup, luxury facials and spa
+            treatments in Ghazipur. Precision cuts, vibrant colour and personalised care by
+            award-winning stylists.
           </p>
 
           <div className="flex flex-wrap gap-4">

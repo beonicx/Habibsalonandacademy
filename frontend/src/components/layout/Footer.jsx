@@ -19,13 +19,19 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="#"
+                href="https://instagram.com/habibsalonacademy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Habib Salon on Instagram"
                 className="w-9 h-9 rounded-full border border-cream/20 flex items-center justify-center hover:border-rose-gold hover:text-rose-gold transition-colors duration-300"
               >
                 <Instagram size={16} />
               </a>
               <a
-                href="#"
+                href="https://facebook.com/habibsalonacademy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Habib Salon on Facebook"
                 className="w-9 h-9 rounded-full border border-cream/20 flex items-center justify-center hover:border-rose-gold hover:text-rose-gold transition-colors duration-300"
               >
                 <Facebook size={16} />
@@ -78,19 +84,19 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <address className="not-italic">
             <h4 className="font-sans text-xs tracking-widest uppercase text-rose-gold mb-5">
               Visit Us
             </h4>
             <ul className="space-y-4 font-body text-sm text-cream/70">
               <li className="flex gap-3">
                 <MapPin size={16} className="text-rose-gold mt-1 shrink-0" />
-                <span>Mathiya (Baghi), Ghazipur Uttar Pradesh, India</span>
+                <span>Mathiya (Baghi), Ghazipur, Uttar Pradesh, India</span>
               </li>
               <li className="flex gap-3">
                 <Phone size={16} className="text-rose-gold shrink-0" />
                 <a
-                  href="tel:+91 9565 459518"
+                  href="tel:+919565459518"
                   className="hover:text-rose-gold transition-colors duration-300"
                 >
                   +91 9565 459518
@@ -111,7 +117,7 @@ export default function Footer() {
               <p>Mon–Sat: 9:00 am – 8:00 pm</p>
               <p>Sunday: 10:00 am – 6:00 pm</p>
             </div>
-          </div>
+          </address>
         </div>
 
         <div className="border-t border-cream/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-cream/40 font-sans">

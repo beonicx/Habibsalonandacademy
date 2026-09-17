@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CheckCircle, Loader } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { CheckCircle, Loader, Coins, Ticket, X, Check } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -37,14 +38,27 @@ const timeSlots = [
 ];
 
 export default function BookingPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, token, loading: authLoading, authFetch } = useAuth();
+  const searchParams = useSearchParams();
+  const preselectedService = searchParams.get("service") || "";
   const [serviceOptions, setServiceOptions] = useState(staticServices);
   const [form, setForm] = useState({
-    name: "", email: "", phone: "", service: "", date: "", time: "", notes: "",
+    name: "", email: "", phone: "", service: preselectedService, date: "", time: "", notes: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState("");
+
+  const [coinBalance, setCoinBalance] = useState(0);
+  const [coinValue, setCoinValue] = useState(0.5);
+  const [useCoins, setUseCoins] = useState(false);
+  const [coinsToRedeem, setCoinsToRedeem] = useState(0);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -76,26 +90,114 @@ export default function BookingPage() {
     loadServices();
   }, []);
 
+  useEffect(() => {
+    if (!user || !authFetch) return;
+    authFetch("/supercoins/my")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setCoinBalance(data.data.balance);
+          setCoinValue(data.data.coinValue || 0.5);
+        }
+      })
+      .catch(() => {});
+  }, [user, authFetch]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
+
+  const discount = useCoins ? coinsToRedeem * coinValue : 0;
+
+  function handleCoinsToggle(checked) {
+    setUseCoins(checked);
+    if (checked && coinBalance > 0) {
+      setCoinsToRedeem(coinBalance);
+    } else {
+      setCoinsToRedeem(0);
+    }
+  }
+
+  function handleCoinsChange(val) {
+    const num = Math.max(0, Math.min(coinBalance, parseInt(val) || 0));
+    setCoinsToRedeem(num);
+  }
+
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/coupons/apply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ code: couponInput.trim(), service: form.service }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setCouponError(data.error || "Invalid coupon");
+        return;
+      }
+      setAppliedCoupon(data.data);
+      setCouponInput("");
+    } catch {
+      setCouponError("Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponError("");
+  }
+
+  const couponDiscountLabel = appliedCoupon
+    ? appliedCoupon.discountType === "percentage"
+      ? `${appliedCoupon.discountValue}% off${appliedCoupon.maxDiscount ? ` (max ₹${appliedCoupon.maxDiscount})` : ""}`
+      : `₹${appliedCoupon.discountValue} off`
+    : "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
+      const payload = {
+        ...form,
+        date: new Date(form.date).toISOString().split("T")[0],
+      };
+
+      if (useCoins && coinsToRedeem > 0) {
+        payload.redeemSuperCoins = coinsToRedeem;
+      }
+      if (appliedCoupon) {
+        payload.couponCode = appliedCoupon.code;
+      }
+
+      const headers = { "Content-Type": "application/json" };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE}/bookings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, date: new Date(form.date).toISOString().split("T")[0] }),
+        headers,
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
         setSuccess(true);
+        setSuccessMessage(data.message || "Booking confirmed!");
+        if (useCoins && coinsToRedeem > 0) {
+          setCoinBalance((prev) => prev - coinsToRedeem);
+        }
       } else {
-        setError(data.errors?.[0]?.msg || "Something went wrong. Please try again.");
+        setError(data.errors?.[0]?.msg || data.error || "Something went wrong. Please try again.");
       }
     } catch {
       setError("Unable to connect. Please check your connection and try again.");
@@ -110,13 +212,42 @@ export default function BookingPage() {
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle size={64} className="text-rose-gold mx-auto mb-6" />
           <h2 className="font-display text-4xl text-espresso mb-4">Booking Confirmed!</h2>
-          <p className="font-body text-mocha mb-8">
+          <p className="font-body text-mocha mb-4">
             Thank you, {form.name}! Your appointment for <strong>{form.service}</strong> on{" "}
             <strong>{form.date}</strong> at <strong>{form.time}</strong> has been received. We'll
             send a confirmation to {form.email}.
           </p>
+          {(discount > 0 || appliedCoupon) && (
+            <div className="space-y-2 mb-6">
+              {appliedCoupon && (
+                <div className="bg-green-50 border border-green-200 rounded-md px-4 py-3">
+                  <p className="font-sans text-sm text-green-700 flex items-center justify-center gap-2">
+                    <Ticket size={16} />
+                    Coupon {appliedCoupon.code} applied — {couponDiscountLabel}!
+                  </p>
+                </div>
+              )}
+              {discount > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-md px-4 py-3">
+                  <p className="font-sans text-sm text-green-700 flex items-center justify-center gap-2">
+                    <Coins size={16} />
+                    {coinsToRedeem} SuperCoins redeemed — ₹{discount.toFixed(0)} discount applied!
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
           <button
-            onClick={() => { setSuccess(false); setForm({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "", service: "", date: "", time: "", notes: "" }); }}
+            onClick={() => {
+              setSuccess(false);
+              setSuccessMessage("");
+              setUseCoins(false);
+              setCoinsToRedeem(0);
+              setAppliedCoupon(null);
+              setCouponInput("");
+              setCouponError("");
+              setForm({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "", service: "", date: "", time: "", notes: "" });
+            }}
             className="inline-flex items-center gap-2 bg-rose-gold text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso hover:scale-105 active:scale-95"
           >
             Book Another Appointment
@@ -265,6 +396,139 @@ export default function BookingPage() {
               />
             </div>
 
+            {/* Coupon Code */}
+            <div className="border border-champagne rounded-lg overflow-hidden">
+              <div className="px-5 py-4 flex items-center gap-3 bg-champagne/20">
+                <div className="w-9 h-9 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                  <Ticket size={18} className="text-rose-gold" />
+                </div>
+                <div>
+                  <p className="font-sans text-sm font-medium text-espresso">
+                    Have a Coupon?
+                  </p>
+                  <p className="font-sans text-xs text-mocha">
+                    Enter your discount code below
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-5 py-4">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Check size={16} className="text-green-600" />
+                      <div>
+                        <p className="font-sans text-sm font-medium text-green-700">
+                          {appliedCoupon.code}
+                        </p>
+                        <p className="font-sans text-xs text-green-600">
+                          {couponDiscountLabel}{appliedCoupon.description ? ` — ${appliedCoupon.description}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCoupon}
+                      className="text-green-600 hover:text-red-500 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponInput}
+                        onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
+                        placeholder="Enter coupon code"
+                        className="flex-1 border border-champagne px-4 py-2.5 font-sans text-sm text-espresso uppercase tracking-wider placeholder:text-mocha/40 placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-rose-gold transition-colors bg-cream rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponInput.trim()}
+                        className="px-5 py-2.5 bg-rose-gold text-cream font-sans text-xs font-medium tracking-widest uppercase rounded-md hover:bg-espresso transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                      >
+                        {couponLoading ? "..." : "Apply"}
+                      </button>
+                    </div>
+                    {couponError && (
+                      <p className="font-sans text-xs text-red-500 mt-2">{couponError}</p>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* SuperCoins Redemption */}
+            {user && coinBalance > 0 && (
+              <div className="border border-champagne rounded-lg overflow-hidden">
+                <div className="px-5 py-4 flex items-center justify-between bg-champagne/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-rose-gold/10 flex items-center justify-center">
+                      <Coins size={18} className="text-rose-gold" />
+                    </div>
+                    <div>
+                      <p className="font-sans text-sm font-medium text-espresso">
+                        Use SuperCoins
+                      </p>
+                      <p className="font-sans text-xs text-mocha">
+                        You have <span className="font-medium text-rose-gold">{coinBalance}</span> coins (worth ₹{(coinBalance * coinValue).toFixed(0)})
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useCoins}
+                      onChange={(e) => handleCoinsToggle(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-champagne peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-gold"></div>
+                  </label>
+                </div>
+
+                {useCoins && (
+                  <div className="px-5 py-4 space-y-3">
+                    <div>
+                      <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                        Coins to Redeem
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min={0}
+                          max={coinBalance}
+                          value={coinsToRedeem}
+                          onChange={(e) => handleCoinsChange(e.target.value)}
+                          className="flex-1 h-2 bg-champagne rounded-lg appearance-none cursor-pointer accent-rose-gold"
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={coinBalance}
+                          value={coinsToRedeem}
+                          onChange={(e) => handleCoinsChange(e.target.value)}
+                          className="w-20 px-3 py-2 border border-champagne rounded-md font-sans text-sm text-center text-espresso focus:outline-none focus:border-rose-gold"
+                        />
+                      </div>
+                    </div>
+                    {coinsToRedeem > 0 && (
+                      <div className="bg-green-50 border border-green-200 rounded-md px-4 py-2.5 flex items-center justify-between">
+                        <p className="font-sans text-sm text-green-700">
+                          Discount applied
+                        </p>
+                        <p className="font-sans text-sm font-medium text-green-700">
+                          - ₹{discount.toFixed(0)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {error && (
               <p className="text-red-600 font-sans text-sm bg-red-50 px-4 py-3 border border-red-200">
                 {error}
@@ -281,7 +545,14 @@ export default function BookingPage() {
                   <Loader size={18} className="animate-spin" /> Processing...
                 </>
               ) : (
-                "Confirm Booking"
+                <>
+                  Confirm Booking
+                  {useCoins && coinsToRedeem > 0 && (
+                    <span className="text-cream/80 font-normal text-sm ml-1">
+                      (₹{discount.toFixed(0)} off)
+                    </span>
+                  )}
+                </>
               )}
             </button>
 

@@ -4,7 +4,7 @@ const bookingController = require("../../controllers/userapp/bookingController")
 const { validateBooking } = require("../../middleware/validation");
 const { optionalAuth } = require("../../middleware/auth");
 
-router.post("/", validateBooking, bookingController.createBooking);
+router.post("/", optionalAuth, validateBooking, bookingController.createBooking);
 router.get("/", optionalAuth, bookingController.getAllBookings);
 router.get("/:id", optionalAuth, bookingController.getBookingById);
 router.patch("/:id/status", bookingController.updateBookingStatus);
