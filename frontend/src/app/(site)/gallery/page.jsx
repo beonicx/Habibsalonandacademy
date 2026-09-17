@@ -48,21 +48,21 @@ export default function GalleryPage() {
 
   return (
     <div className="pt-16">
-      <div className="bg-espresso text-cream py-20 px-6 text-center">
-        <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">Our Work</p>
-        <h1 className="font-display text-6xl text-cream">Our Work & Transformations</h1>
-        <p className="font-body text-cream/60 mt-4 max-w-xl mx-auto">
+      <div className="bg-espresso text-cream py-12 sm:py-20 px-4 sm:px-6 text-center">
+        <p className="font-sans text-xs sm:text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">Our Work</p>
+        <h1 className="font-display text-3xl sm:text-4xl md:text-6xl text-cream">Our Work & Transformations</h1>
+        <p className="font-body text-sm sm:text-base text-cream/60 mt-4 max-w-xl mx-auto">
           Browse hair styling, bridal makeup, facial results and nail art from Habib Salon & Academy, Ghazipur.
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-8 sm:mb-12">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`font-sans text-xs tracking-widest uppercase px-6 py-2.5 border transition-all duration-300 ${
+              className={`font-sans text-[10px] sm:text-xs tracking-widest uppercase px-3 sm:px-6 py-2 sm:py-2.5 border transition-all duration-300 ${
                 active === cat
                   ? "bg-rose-gold text-cream border-rose-gold"
                   : "border-champagne text-mocha hover:border-rose-gold hover:text-rose-gold"
@@ -87,7 +87,7 @@ export default function GalleryPage() {
                   className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-espresso/0 group-hover:bg-espresso/50 transition-all duration-300 flex items-end">
-                  <p className="font-display text-cream text-xl p-4 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <p className="font-display text-cream text-base sm:text-xl p-3 sm:p-4 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     {img.title}
                   </p>
                 </div>
@@ -96,11 +96,11 @@ export default function GalleryPage() {
           </div>
         )}
 
-        <div className="text-center mt-16">
-          <p className="font-body text-mocha mb-6">Inspired? Your transformation awaits.</p>
+        <div className="text-center mt-10 sm:mt-16">
+          <p className="font-body text-sm sm:text-base text-mocha mb-4 sm:mb-6">Inspired? Your transformation awaits.</p>
           <Link
             href="/booking"
-            className="inline-flex items-center gap-2 bg-rose-gold text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 bg-rose-gold text-cream px-6 sm:px-8 py-3 sm:py-3.5 font-sans text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso hover:scale-105 active:scale-95"
           >
             Book an Appointment
           </Link>
