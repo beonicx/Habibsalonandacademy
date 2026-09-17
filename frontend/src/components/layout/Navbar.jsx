@@ -21,8 +21,10 @@ export default function Navbar() {
   const [authMode, setAuthMode] = useState("login");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { user, loading, login, register, googleLogin, logout } = useAuth();
   const profileRef = useRef(null);
+  const mobileSearchRef = useRef(null);
   const router = useRouter();
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -58,11 +60,18 @@ export default function Navbar() {
       if (e.key === "Escape") {
         setOpen(false);
         setShowProfileMenu(false);
+        setMobileSearchOpen(false);
       }
     }
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
+
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchRef.current) {
+      mobileSearchRef.current.focus();
+    }
+  }, [mobileSearchOpen]);
 
   function handleSearch(e) {
     e.preventDefault();
@@ -230,22 +239,70 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile/Tablet right side: search icon + profile + hamburger */}
-          <div className="flex lg:hidden items-center gap-3">
-            {!loading && user && (
-              <Link
-                href="/dashboard"
-                className="w-9 h-9 rounded-full bg-rose-gold text-cream flex items-center justify-center font-sans text-sm font-medium"
+          {/* Mobile/Tablet right side: search + profile + hamburger */}
+          <div className="flex lg:hidden items-center gap-2">
+            {/* Search icon / expandable bar */}
+            {mobileSearchOpen ? (
+              <form
+                onSubmit={(e) => { handleSearch(e); setMobileSearchOpen(false); }}
+                className="absolute inset-x-0 top-0 bottom-0 z-10 flex items-center px-3 bg-cream/95 backdrop-blur-sm"
               >
-                {userInitial}
-              </Link>
+                <input
+                  ref={mobileSearchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search services..."
+                  className="flex-1 min-w-0 px-3 py-2 font-sans text-sm text-espresso placeholder:text-mocha/50 bg-white border border-champagne rounded-md focus:outline-none focus:border-rose-gold"
+                />
+                <button type="submit" className="px-2 text-rose-gold hover:text-espresso transition-colors">
+                  <Search size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMobileSearchOpen(false); setSearchQuery(""); }}
+                  className="px-1 text-mocha hover:text-espresso transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setMobileSearchOpen(true)}
+                className={`p-2 rounded-full transition-colors duration-300 ${dark ? "text-espresso hover:bg-champagne/50" : "text-cream hover:bg-cream/10"}`}
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
             )}
+
+            {/* Profile icon */}
+            {!loading && (
+              user ? (
+                <Link
+                  href="/dashboard"
+                  className="w-8 h-8 rounded-full bg-rose-gold text-cream flex items-center justify-center font-sans text-xs font-medium flex-shrink-0"
+                >
+                  {userInitial}
+                </Link>
+              ) : (
+                <button
+                  onClick={openLogin}
+                  className={`p-2 rounded-full transition-colors duration-300 ${dark ? "text-espresso hover:bg-champagne/50" : "text-cream hover:bg-cream/10"}`}
+                  aria-label="Login"
+                >
+                  <User size={20} />
+                </button>
+              )
+            )}
+
+            {/* Hamburger */}
             <button
-              className={`transition-colors duration-500 ${dark ? "text-espresso" : "text-cream"}`}
+              className={`p-1 transition-colors duration-500 ${dark ? "text-espresso" : "text-cream"}`}
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
             >
-              {open ? <X size={28} /> : <Menu size={28} />}
+              {open ? <X size={26} /> : <Menu size={26} />}
             </button>
           </div>
         </div>
@@ -271,105 +328,73 @@ export default function Navbar() {
                   </Link>
                 ))}
 
-                {/* Search - Mobile */}
-                <form
-                  onSubmit={handleSearch}
-                  className="flex items-center border border-champagne rounded-lg overflow-hidden bg-white mt-1"
-                >
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search services..."
-                    className="flex-1 min-w-0 px-4 py-3 font-sans text-base text-espresso placeholder:text-mocha/50 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-3 text-rose-gold hover:text-espresso transition-colors flex-shrink-0"
-                  >
-                    <Search size={18} />
-                  </button>
-                </form>
-
                 {/* Auth Section - Mobile */}
-                {!loading && (
+                {!loading && user && (
                   <div className="border-t border-champagne pt-5 flex flex-col gap-4">
-                    {user ? (
-                      <>
-                        <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-full bg-rose-gold text-cream flex items-center justify-center font-sans text-base font-medium flex-shrink-0">
-                            {userInitial}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-sans text-base font-medium text-espresso truncate">
-                              {user.name}
-                            </p>
-                            <p className="font-sans text-sm text-mocha truncate">
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-rose-gold text-cream flex items-center justify-center font-sans text-base font-medium flex-shrink-0">
+                        {userInitial}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-sans text-base font-medium text-espresso truncate">
+                          {user.name}
+                        </p>
+                        <p className="font-sans text-sm text-mocha truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <Link
-                            href="/dashboard"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
-                            onClick={() => setOpen(false)}
-                          >
-                            <User size={18} className="flex-shrink-0" />
-                            Dashboard
-                          </Link>
-                          <Link
-                            href="/booking"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
-                            onClick={() => setOpen(false)}
-                          >
-                            <CalendarPlus size={18} className="flex-shrink-0" />
-                            Book Now
-                          </Link>
-                          <Link
-                            href="/orders"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
-                            onClick={() => setOpen(false)}
-                          >
-                            <ShoppingBag size={18} className="flex-shrink-0" />
-                            Orders
-                          </Link>
-                          <Link
-                            href="/supercoins"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
-                            onClick={() => setOpen(false)}
-                          >
-                            <Coins size={18} className="flex-shrink-0" />
-                            SuperCoins
-                          </Link>
-                          <Link
-                            href="/coupons"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors col-span-2"
-                            onClick={() => setOpen(false)}
-                          >
-                            <Ticket size={18} className="flex-shrink-0" />
-                            Coupons
-                          </Link>
-                        </div>
-
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center justify-center gap-2.5 w-full py-3.5 font-sans text-sm sm:text-base tracking-widest uppercase text-mocha hover:text-rose-gold transition-colors duration-300 border border-champagne rounded-lg bg-white"
-                        >
-                          <LogOut size={18} />
-                          Sign Out
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={openLogin}
-                        className="flex items-center justify-center gap-2.5 font-sans text-base tracking-widest uppercase text-cream bg-rose-gold hover:bg-espresso transition-colors duration-300 py-3.5 rounded-md"
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                        onClick={() => setOpen(false)}
                       >
-                        <User size={18} />
-                        Login / Register
-                      </button>
-                    )}
+                        <User size={18} className="flex-shrink-0" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/booking"
+                        className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                        onClick={() => setOpen(false)}
+                      >
+                        <CalendarPlus size={18} className="flex-shrink-0" />
+                        Book Now
+                      </Link>
+                      <Link
+                        href="/orders"
+                        className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                        onClick={() => setOpen(false)}
+                      >
+                        <ShoppingBag size={18} className="flex-shrink-0" />
+                        Orders
+                      </Link>
+                      <Link
+                        href="/supercoins"
+                        className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                        onClick={() => setOpen(false)}
+                      >
+                        <Coins size={18} className="flex-shrink-0" />
+                        SuperCoins
+                      </Link>
+                      <Link
+                        href="/coupons"
+                        className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors col-span-2"
+                        onClick={() => setOpen(false)}
+                      >
+                        <Ticket size={18} className="flex-shrink-0" />
+                        Coupons
+                      </Link>
+                    </div>
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center gap-2.5 w-full py-3.5 font-sans text-sm sm:text-base tracking-widest uppercase text-mocha hover:text-rose-gold transition-colors duration-300 border border-champagne rounded-lg bg-white"
+                    >
+                      <LogOut size={18} />
+                      Sign Out
+                    </button>
                   </div>
                 )}
               </div>
