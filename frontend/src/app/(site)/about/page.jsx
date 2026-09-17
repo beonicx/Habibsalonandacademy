@@ -19,14 +19,14 @@ const team = [
 
 export default function AboutPage() {
   return (
-    <div className="pt-24">
+    <div className="pt-16">
       {/* Hero */}
       <div className="relative py-28 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560066984-138daaa0c66d?w=1600&q=80')" }}
         />
-        <div className="absolute inset-0 bg-espresso/80" />
+        <div className="absolute inset-0 bg-espresso" />
         <div className="relative z-10 text-center text-cream max-w-3xl mx-auto px-6">
           <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-4">Our Story</p>
           <h1 className="font-display text-6xl md:text-7xl text-cream leading-tight mb-6">

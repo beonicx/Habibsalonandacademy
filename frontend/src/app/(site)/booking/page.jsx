@@ -208,7 +208,7 @@ function BookingContent() {
 
   if (success) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center bg-cream">
+      <div className="pt-16 min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center max-w-md mx-auto px-6">
           <CheckCircle size={64} className="text-rose-gold mx-auto mb-6" />
           <h2 className="font-display text-4xl text-espresso mb-4">Booking Confirmed!</h2>

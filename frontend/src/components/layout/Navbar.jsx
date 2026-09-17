@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins, Eye, EyeOff, ArrowLeft, CalendarPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -24,6 +24,9 @@ export default function Navbar() {
   const { user, loading, login, register, googleLogin, logout } = useAuth();
   const profileRef = useRef(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const dark = !isHome || scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -88,7 +91,7 @@ export default function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+          dark
             ? "bg-cream/95 backdrop-blur-sm shadow-sm py-2 lg:py-3"
             : "bg-transparent py-3 lg:py-5"
         }`}
@@ -100,7 +103,7 @@ export default function Navbar() {
               size={22}
               className="text-rose-gold transition-transform duration-300 group-hover:rotate-45 lg:w-[24px] lg:h-[24px]"
             />
-            <span className={`font-display text-lg sm:text-xl lg:text-2xl tracking-wide transition-colors duration-500 ${scrolled ? "text-espresso" : "text-cream"}`}>
+            <span className={`font-display text-lg sm:text-xl lg:text-2xl tracking-wide transition-colors duration-500 ${dark ? "text-espresso" : "text-cream"}`}>
               <span className="text-rose-gold">Habib</span> Salon & Academy
             </span>
           </Link>
@@ -111,7 +114,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-sans text-sm xl:text-base tracking-widest uppercase transition-colors duration-300 whitespace-nowrap ${scrolled ? "text-mocha hover:text-rose-gold" : "text-cream/80 hover:text-rose-gold"}`}
+                className={`font-sans text-sm xl:text-base tracking-widest uppercase transition-colors duration-300 whitespace-nowrap ${dark ? "text-mocha hover:text-rose-gold" : "text-cream/80 hover:text-rose-gold"}`}
               >
                 {link.label}
               </Link>
@@ -120,13 +123,13 @@ export default function Navbar() {
 
           {/* Search + Auth - Desktop (Right) */}
           <div className="hidden lg:flex items-center gap-3 xl:gap-5 flex-shrink-0">
-            <form onSubmit={handleSearch} className={`flex items-center rounded-md overflow-hidden border transition-colors duration-500 ${scrolled ? "bg-white/80 border-champagne" : "bg-cream/10 border-cream/20"}`}>
+            <form onSubmit={handleSearch} className={`flex items-center rounded-md overflow-hidden border transition-colors duration-500 ${dark ? "bg-white/80 border-champagne" : "bg-cream/10 border-cream/20"}`}>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search services..."
-                className={`w-36 xl:w-56 px-3 xl:px-4 py-2 font-sans text-sm focus:outline-none bg-transparent transition-colors duration-500 ${scrolled ? "text-espresso placeholder:text-mocha/50" : "text-cream placeholder:text-cream/40"}`}
+                className={`w-36 xl:w-56 px-3 xl:px-4 py-2 font-sans text-sm focus:outline-none bg-transparent transition-colors duration-500 ${dark ? "text-espresso placeholder:text-mocha/50" : "text-cream placeholder:text-cream/40"}`}
               />
               <button
                 type="submit"
@@ -151,7 +154,7 @@ export default function Navbar() {
                         size={14}
                         className={`transition-all duration-200 ${
                           showProfileMenu ? "rotate-180" : ""
-                        } ${scrolled ? "text-mocha" : "text-cream/70"}`}
+                        } ${dark ? "text-mocha" : "text-cream/70"}`}
                       />
                     </button>
                     {showProfileMenu && (
@@ -217,7 +220,7 @@ export default function Navbar() {
                 ) : (
                   <button
                     onClick={openLogin}
-                    className={`flex items-center gap-2 font-sans text-sm tracking-widest uppercase transition-colors duration-300 whitespace-nowrap ${scrolled ? "text-mocha hover:text-rose-gold" : "text-cream/80 hover:text-rose-gold"}`}
+                    className={`flex items-center gap-2 font-sans text-sm tracking-widest uppercase transition-colors duration-300 whitespace-nowrap ${dark ? "text-mocha hover:text-rose-gold" : "text-cream/80 hover:text-rose-gold"}`}
                   >
                     <User size={16} />
                     Login
@@ -238,7 +241,7 @@ export default function Navbar() {
               </Link>
             )}
             <button
-              className={`transition-colors duration-500 ${scrolled ? "text-espresso" : "text-cream"}`}
+              className={`transition-colors duration-500 ${dark ? "text-espresso" : "text-cream"}`}
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
             >

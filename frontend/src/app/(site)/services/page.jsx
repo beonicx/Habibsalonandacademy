@@ -184,7 +184,7 @@ function ServicesContent() {
   const totalResults = filteredServices.reduce((sum, cat) => sum + cat.items.length, 0);
 
   return (
-    <div className="pt-24">
+    <div className="pt-16">
       <div className="bg-espresso text-cream py-20 px-6 text-center">
         <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">
           What We Offer

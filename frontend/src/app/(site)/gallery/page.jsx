@@ -47,7 +47,7 @@ export default function GalleryPage() {
   const filtered = active === "all" ? gallery : gallery.filter((g) => g.category === active);
 
   return (
-    <div className="pt-24">
+    <div className="pt-16">
       <div className="bg-espresso text-cream py-20 px-6 text-center">
         <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">Our Work</p>
         <h1 className="font-display text-6xl text-cream">Our Work & Transformations</h1>
