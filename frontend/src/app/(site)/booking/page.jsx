@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Loader, Coins, Ticket, X, Check } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
@@ -37,7 +37,7 @@ const timeSlots = [
   "6:00 PM", "6:30 PM", "7:00 PM",
 ];
 
-export default function BookingPage() {
+function BookingContent() {
   const { user, token, loading: authLoading, authFetch } = useAuth();
   const searchParams = useSearchParams();
   const preselectedService = searchParams.get("service") || "";
@@ -566,5 +566,13 @@ export default function BookingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense>
+      <BookingContent />
+    </Suspense>
   );
 }

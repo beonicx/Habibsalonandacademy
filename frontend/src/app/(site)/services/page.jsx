@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Search, X } from "lucide-react";
@@ -117,7 +117,7 @@ function HighlightText({ text, query }) {
   );
 }
 
-export default function ServicesPage() {
+function ServicesContent() {
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(urlSearch);
@@ -320,5 +320,13 @@ export default function ServicesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense>
+      <ServicesContent />
+    </Suspense>
   );
 }
