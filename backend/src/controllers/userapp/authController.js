@@ -7,6 +7,9 @@ const User = require("../../models/User");
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
 const PASSWORD_RULES = "Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number and 1 special character";
 
+const pendingRegistrations = new Map();
+const OTP_EXPIRY_MS = 10 * 60 * 1000;
+
 function getMailTransporter() {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -37,7 +40,7 @@ function generateRefreshToken(user) {
   );
 }
 
-async function register(req, res) {
+async function sendRegistrationOtp(req, res) {
   try {
     const { name, email, password, phone } = req.body;
 
@@ -45,12 +48,95 @@ async function register(req, res) {
       return res.status(400).json({ error: "Name, email and password are required" });
     }
 
+    if (!PASSWORD_REGEX.test(password)) {
+      return res.status(400).json({ error: PASSWORD_RULES });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered" });
     }
 
-    const user = await User.create({ name, email, password, phone });
+    const otp = crypto.randomInt(100000, 999999).toString();
+    pendingRegistrations.set(email.toLowerCase(), {
+      name,
+      email: email.toLowerCase(),
+      password,
+      phone,
+      otp,
+      expiresAt: Date.now() + OTP_EXPIRY_MS,
+    });
+
+    try {
+      const transporter = getMailTransporter();
+      await transporter.sendMail({
+        from: `"Habib Salon & Academy" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Verify Your Email – Habib Salon & Academy",
+        html: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 500px; margin: 0 auto; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;">
+            <div style="background: #1a1a2e; color: #fff; padding: 24px; text-align: center;">
+              <h1 style="margin: 0; font-size: 22px;">Habib Salon & Academy</h1>
+            </div>
+            <div style="padding: 28px 24px; text-align: center;">
+              <p style="font-size: 15px; color: #333; margin: 0 0 6px;">Hi <strong>${name}</strong>,</p>
+              <p style="font-size: 14px; color: #666; margin: 0 0 24px;">Use the code below to verify your email and complete registration:</p>
+              <div style="font-size: 36px; font-weight: bold; letter-spacing: 10px; padding: 18px; background: #f5f0eb; border-radius: 8px; color: #B76E79; display: inline-block;">${otp}</div>
+              <p style="font-size: 13px; color: #999; margin: 24px 0 0;">This code expires in 10 minutes.</p>
+            </div>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send registration OTP:", emailErr);
+      pendingRegistrations.delete(email.toLowerCase());
+      return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+    }
+
+    res.json({ message: "OTP sent to your email" });
+  } catch (err) {
+    console.error("Send registration OTP error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
+async function register(req, res) {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+
+    const pending = pendingRegistrations.get(email.toLowerCase());
+    if (!pending) {
+      return res.status(400).json({ error: "No pending registration found. Please request a new OTP." });
+    }
+
+    if (Date.now() > pending.expiresAt) {
+      pendingRegistrations.delete(email.toLowerCase());
+      return res.status(400).json({ error: "OTP has expired. Please request a new one." });
+    }
+
+    if (pending.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    const existingUser = await User.findOne({ email: pending.email });
+    if (existingUser) {
+      pendingRegistrations.delete(email.toLowerCase());
+      return res.status(409).json({ error: "Email already registered" });
+    }
+
+    const user = await User.create({
+      name: pending.name,
+      email: pending.email,
+      password: pending.password,
+      phone: pending.phone,
+    });
+
+    pendingRegistrations.delete(email.toLowerCase());
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -310,4 +396,4 @@ async function changePassword(req, res) {
   }
 }
 
-module.exports = { register, login, refreshToken, getProfile, updateProfile, googleAuth, forgotPassword, resetPassword, changePassword };
+module.exports = { sendRegistrationOtp, register, login, refreshToken, getProfile, updateProfile, googleAuth, forgotPassword, resetPassword, changePassword };

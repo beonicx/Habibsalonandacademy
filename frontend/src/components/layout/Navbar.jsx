@@ -22,7 +22,7 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const { user, loading, login, register, googleLogin, logout } = useAuth();
+  const { user, loading, login, sendRegistrationOtp, verifyRegistrationOtp, googleLogin, logout } = useAuth();
   const profileRef = useRef(null);
   const mobileSearchRef = useRef(null);
   const router = useRouter();
@@ -410,7 +410,8 @@ export default function Navbar() {
           setMode={setAuthMode}
           onClose={() => setShowAuthModal(false)}
           login={login}
-          register={register}
+          sendRegistrationOtp={sendRegistrationOtp}
+          verifyRegistrationOtp={verifyRegistrationOtp}
           googleLogin={googleLogin}
         />
       )}
@@ -474,7 +475,7 @@ function PasswordStrength({ password }) {
   );
 }
 
-function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
+function AuthModal({ mode, setMode, onClose, login, sendRegistrationOtp, verifyRegistrationOtp, googleLogin }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -488,6 +489,9 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [registerOtp, setRegisterOtp] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   async function handleGoogleSuccess(credentialResponse) {
     setError("");
     setSubmitting(true);
@@ -500,6 +504,16 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function startResendCooldown() {
+    setResendCooldown(30);
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
   }
 
   async function handleSubmit(e) {
@@ -516,11 +530,44 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     try {
       if (mode === "login") {
         await login(email, password);
+        onClose();
+        window.location.href = "/dashboard";
       } else {
-        await register(name, email, password, phone);
+        await sendRegistrationOtp(name, email, password, phone);
+        setSuccess("OTP sent to your email!");
+        setMode("registerOtp");
+        startResendCooldown();
       }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleRegisterOtpSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      await verifyRegistrationOtp(email, registerOtp);
       onClose();
       window.location.href = "/dashboard";
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleResendRegistrationOtp() {
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+    try {
+      await sendRegistrationOtp(name, email, password, phone);
+      setSuccess("New OTP sent to your email!");
+      startResendCooldown();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -589,6 +636,7 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     setMode(mode === "login" ? "register" : "login");
     setError("");
     setSuccess("");
+    setRegisterOtp("");
   }
 
   function goToForgot() {
@@ -602,18 +650,22 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
     setMode("login");
     setError("");
     setSuccess("");
+    setRegisterOtp("");
   }
 
   const isForgotFlow = mode === "forgot" || mode === "otp";
+  const isRegisterOtpFlow = mode === "registerOtp";
   const modalTitle = {
     login: "Welcome Back",
     register: "Join Us",
+    registerOtp: "Verify Your Email",
     forgot: "Forgot Password",
     otp: "Reset Password",
   }[mode];
   const modalSubtitle = {
     login: "Sign in to your account",
     register: "Create your account",
+    registerOtp: `We sent a 6-digit code to ${email}`,
     forgot: "Enter your email to receive an OTP",
     otp: "Enter the OTP and your new password",
   }[mode];
@@ -627,10 +679,10 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
       <div className="relative bg-cream rounded-lg shadow-2xl w-full max-w-md animate-fade-up overflow-hidden max-h-[calc(100vh-2rem)] overflow-y-auto">
         {/* Header */}
         <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4 text-center">
-          {isForgotFlow && (
+          {(isForgotFlow || isRegisterOtpFlow) && (
             <button
               type="button"
-              onClick={backToLogin}
+              onClick={isRegisterOtpFlow ? () => { setMode("register"); setError(""); setSuccess(""); setRegisterOtp(""); } : backToLogin}
               className="absolute top-4 left-4 flex items-center gap-1 font-sans text-xs text-mocha hover:text-rose-gold transition-colors"
             >
               <ArrowLeft size={14} />
@@ -738,6 +790,55 @@ function AuthModal({ mode, setMode, onClose, login, register, googleLogin }) {
             >
               {submitting ? "Resetting..." : "Reset Password"}
             </button>
+          </form>
+        )}
+
+        {/* Register OTP verification */}
+        {mode === "registerOtp" && (
+          <form onSubmit={handleRegisterOtpSubmit} className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-sans rounded-md px-4 py-2">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-sans rounded-md px-4 py-2">
+                {success}
+              </div>
+            )}
+            <div>
+              <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-1.5">
+                Verification Code
+              </label>
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={registerOtp}
+                onChange={(e) => setRegisterOtp(e.target.value.replace(/\D/g, ""))}
+                className="w-full px-4 py-3 bg-white border border-champagne rounded-md font-sans text-sm text-espresso placeholder:text-mocha/50 focus:outline-none focus:border-rose-gold transition-colors tracking-[0.3em] text-center text-lg"
+                placeholder="Enter 6-digit code"
+                autoFocus
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting || registerOtp.length !== 6}
+              className="w-full bg-rose-gold text-cream py-3 font-sans text-xs font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
+            >
+              {submitting ? "Verifying..." : "Verify & Create Account"}
+            </button>
+            <p className="text-center font-sans text-sm text-mocha">
+              {"Didn't receive the code? "}
+              <button
+                type="button"
+                onClick={handleResendRegistrationOtp}
+                disabled={submitting || resendCooldown > 0}
+                className="text-rose-gold hover:text-espresso font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
+              </button>
+            </p>
           </form>
         )}
 

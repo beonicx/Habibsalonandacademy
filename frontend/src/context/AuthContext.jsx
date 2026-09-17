@@ -85,11 +85,22 @@ export function AuthProvider({ children }) {
     return data;
   }
 
-  async function register(name, email, password, phone) {
-    const res = await fetch(`${API_BASE}/auth/register`, {
+  async function sendRegistrationOtp(name, email, password, phone) {
+    const res = await fetch(`${API_BASE}/auth/send-registration-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password, phone }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+    return data;
+  }
+
+  async function verifyRegistrationOtp(email, otp) {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Registration failed");
@@ -133,7 +144,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, register, googleLogin, logout, updateProfile, authFetch }}
+      value={{ user, token, loading, login, sendRegistrationOtp, verifyRegistrationOtp, googleLogin, logout, updateProfile, authFetch }}
     >
       {children}
     </AuthContext.Provider>

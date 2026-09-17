@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { register, login, refreshToken, getProfile, updateProfile, googleAuth, forgotPassword, resetPassword, changePassword } = require("../../controllers/userapp/authController");
+const { sendRegistrationOtp, register, login, refreshToken, getProfile, updateProfile, googleAuth, forgotPassword, resetPassword, changePassword } = require("../../controllers/userapp/authController");
 const { authenticateToken } = require("../../middleware/auth");
 
+router.post("/send-registration-otp", sendRegistrationOtp);
 router.post("/register", register);
 router.post("/login", login);
 router.post("/google", googleAuth);
