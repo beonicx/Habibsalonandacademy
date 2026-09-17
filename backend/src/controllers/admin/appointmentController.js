@@ -1,6 +1,7 @@
 const Booking = require("../../models/Booking");
 const User = require("../../models/User");
 const Notification = require("../../models/Notification");
+const { sendAppointmentStatusEmail } = require("../../services/emailService");
 
 async function getAllAppointments(req, res) {
   try {
@@ -223,6 +224,8 @@ async function updateAppointmentStatus(req, res) {
         });
       }
     }
+
+    sendAppointmentStatusEmail(appointment, status, cancellationReason);
 
     res.json({ success: true, data: appointment });
   } catch (err) {
