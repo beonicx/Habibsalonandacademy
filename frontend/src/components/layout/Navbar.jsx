@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Menu, X, Scissors, User, LogOut, ChevronDown, Search, ShoppingBag, Ticket, Coins, Eye, EyeOff, ArrowLeft, CalendarPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
@@ -173,6 +173,14 @@ export default function Navbar() {
                           My Dashboard
                         </Link>
                         <Link
+                          href="/booking"
+                          onClick={() => setShowProfileMenu(false)}
+                          className="flex items-center gap-3 px-4 py-3 font-sans text-sm text-mocha hover:bg-cream hover:text-rose-gold transition-colors duration-200"
+                        >
+                          <CalendarPlus size={16} />
+                          Book Appointment
+                        </Link>
+                        <Link
                           href="/orders"
                           onClick={() => setShowProfileMenu(false)}
                           className="flex items-center gap-3 px-4 py-3 font-sans text-sm text-mocha hover:bg-cream hover:text-rose-gold transition-colors duration-200"
@@ -309,6 +317,14 @@ export default function Navbar() {
                             Dashboard
                           </Link>
                           <Link
+                            href="/booking"
+                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                            onClick={() => setOpen(false)}
+                          >
+                            <CalendarPlus size={18} className="flex-shrink-0" />
+                            Book Now
+                          </Link>
+                          <Link
                             href="/orders"
                             className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
                             onClick={() => setOpen(false)}
@@ -326,7 +342,7 @@ export default function Navbar() {
                           </Link>
                           <Link
                             href="/coupons"
-                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors"
+                            className="flex items-center gap-2.5 bg-white rounded-lg border border-champagne px-4 py-3.5 font-sans text-sm sm:text-base text-mocha hover:border-rose-gold hover:text-rose-gold transition-colors col-span-2"
                             onClick={() => setOpen(false)}
                           >
                             <Ticket size={18} className="flex-shrink-0" />
