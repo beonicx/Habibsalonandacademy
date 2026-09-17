@@ -11,6 +11,7 @@ const galleryRouter = require("./routes/userapp/gallery");
 const contactRouter = require("./routes/userapp/contact");
 const supercoinsRouter = require("./routes/userapp/supercoins");
 const couponsRouter = require("./routes/userapp/coupons");
+const membershipRouter = require("./routes/userapp/membership");
 
 const adminRouter = require("./routes/admin");
 
@@ -41,6 +42,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -55,6 +57,7 @@ app.use("/api/gallery", galleryRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/supercoins", supercoinsRouter);
 app.use("/api/coupons", couponsRouter);
+app.use("/api/memberships", membershipRouter);
 
 // Admin routes
 app.use("/api/admin", adminRouter);

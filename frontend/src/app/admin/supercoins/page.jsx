@@ -1,19 +1,27 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { Star, Plus, Minus, X, Loader, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Star, Plus, Minus, X, Loader, ChevronLeft, ChevronRight, Trophy, Pencil, Search } from "lucide-react";
 import { superCoins } from "../../../lib/adminApi";
 
 export default function AdminSuperCoinsPage() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [customerList, setCustomerList] = useState([]);
   const [loadingBoard, setLoadingBoard] = useState(true);
   const [loadingTxns, setLoadingTxns] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ pages: 1, total: 0 });
   const [modal, setModal] = useState(null);
-  const [form, setForm] = useState({ userId: "", points: "", description: "" });
+  const [form, setForm] = useState({ email: "", points: "", description: "" });
+  const [editForm, setEditForm] = useState({ email: "", superCoins: "", totalSpent: "" });
   const [saving, setSaving] = useState(false);
+  const [emailSearch, setEmailSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [editEmailSearch, setEditEmailSearch] = useState("");
+  const [showEditDropdown, setShowEditDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const editDropdownRef = useRef(null);
 
   const loadLeaderboard = useCallback(async () => {
     try {
@@ -36,25 +44,98 @@ export default function AdminSuperCoinsPage() {
     finally { setLoadingTxns(false); }
   }, [page]);
 
+  const loadCustomers = useCallback(async () => {
+    try {
+      const res = await superCoins.getCustomerEmails();
+      if (res.success) setCustomerList(res.data || []);
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => { loadLeaderboard(); }, [loadLeaderboard]);
   useEffect(() => { loadTransactions(); }, [loadTransactions]);
+  useEffect(() => { loadCustomers(); }, [loadCustomers]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false);
+      if (editDropdownRef.current && !editDropdownRef.current.contains(e.target)) setShowEditDropdown(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCustomers = customerList.filter(c =>
+    c.email.toLowerCase().includes(emailSearch.toLowerCase()) ||
+    c.name.toLowerCase().includes(emailSearch.toLowerCase())
+  );
+
+  const filteredEditCustomers = customerList.filter(c =>
+    c.email.toLowerCase().includes(editEmailSearch.toLowerCase()) ||
+    c.name.toLowerCase().includes(editEmailSearch.toLowerCase())
+  );
+
+  function selectEmail(customer) {
+    setForm({ ...form, email: customer.email });
+    setEmailSearch(customer.email);
+    setShowDropdown(false);
+  }
+
+  function selectEditEmail(customer) {
+    const found = leaderboard.find(u => u.email === customer.email);
+    setEditForm({
+      email: customer.email,
+      superCoins: found?.superCoins ?? 0,
+      totalSpent: found?.totalSpent ?? 0,
+    });
+    setEditEmailSearch(customer.email);
+    setShowEditDropdown(false);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSaving(true);
     setError("");
     try {
-      const data = { userId: form.userId, points: Number(form.points), description: form.description };
+      const data = { email: form.email, points: Number(form.points), description: form.description };
       if (modal === "add") {
         await superCoins.addPoints(data);
       } else {
         await superCoins.redeemPoints(data);
       }
       setModal(null);
-      setForm({ userId: "", points: "", description: "" });
+      setForm({ email: "", points: "", description: "" });
+      setEmailSearch("");
       await Promise.all([loadLeaderboard(), loadTransactions()]);
     } catch (err) { setError(err.message || "Failed to process"); }
     finally { setSaving(false); }
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      await superCoins.editCoins({
+        email: editForm.email,
+        superCoins: Number(editForm.superCoins),
+        totalSpent: Number(editForm.totalSpent),
+      });
+      setModal(null);
+      setEditForm({ email: "", superCoins: "", totalSpent: "" });
+      setEditEmailSearch("");
+      await loadLeaderboard();
+    } catch (err) { setError(err.message || "Failed to update"); }
+    finally { setSaving(false); }
+  }
+
+  function openEditFromLeaderboard(user) {
+    setEditForm({
+      email: user.email,
+      superCoins: user.superCoins,
+      totalSpent: user.totalSpent || 0,
+    });
+    setEditEmailSearch(user.email);
+    setModal("edit");
   }
 
   return (
@@ -65,13 +146,17 @@ export default function AdminSuperCoinsPage() {
           <p className="text-sm text-gray-600 mt-1">Manage SuperCoins and rewards</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { setForm({ userId: "", points: "", description: "" }); setModal("add"); }}
+          <button onClick={() => { setForm({ email: "", points: "", description: "" }); setEmailSearch(""); setModal("add"); }}
             className="inline-flex items-center gap-1.5 bg-[#C9956B] text-white px-4 py-2 rounded-lg hover:bg-[#A67050] text-sm font-medium">
             <Plus size={16} /> Add SuperCoins
           </button>
-          <button onClick={() => { setForm({ userId: "", points: "", description: "" }); setModal("redeem"); }}
+          <button onClick={() => { setForm({ email: "", points: "", description: "" }); setEmailSearch(""); setModal("redeem"); }}
             className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
             <Minus size={16} /> Redeem
+          </button>
+          <button onClick={() => { setEditForm({ email: "", superCoins: "", totalSpent: "" }); setEditEmailSearch(""); setModal("edit"); }}
+            className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium">
+            <Pencil size={16} /> Edit
           </button>
         </div>
       </div>
@@ -98,6 +183,7 @@ export default function AdminSuperCoinsPage() {
                     <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right">SuperCoins</th>
                     <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Total Spent</th>
                     <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Visits</th>
+                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-center w-16">Edit</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -120,6 +206,12 @@ export default function AdminSuperCoinsPage() {
                       <td className="px-4 py-3 text-right font-semibold text-[#C9956B]">{user.superCoins}</td>
                       <td className="px-4 py-3 text-right text-gray-700 hidden sm:table-cell">₹{user.totalSpent || 0}</td>
                       <td className="px-4 py-3 text-right text-gray-700 hidden sm:table-cell">{user.visitCount || 0}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button onClick={() => openEditFromLeaderboard(user)}
+                          className="p-1.5 text-gray-400 hover:text-[#C9956B] hover:bg-gray-100 rounded-lg transition-colors">
+                          <Pencil size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -197,7 +289,7 @@ export default function AdminSuperCoinsPage() {
       </div>
 
       {/* Add / Redeem Modal */}
-      {modal && (
+      {(modal === "add" || modal === "redeem") && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setModal(null)}>
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -205,10 +297,39 @@ export default function AdminSuperCoinsPage() {
               <button onClick={() => setModal(null)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">User ID *</label>
-                <input required value={form.userId} onChange={e => setForm({...form, userId: e.target.value})} placeholder="MongoDB User ID"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
+              <div ref={dropdownRef} className="relative">
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Customer Email *</label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    required
+                    value={emailSearch}
+                    onChange={e => {
+                      setEmailSearch(e.target.value);
+                      setForm({ ...form, email: e.target.value });
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    placeholder="Search by name or email"
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]"
+                  />
+                </div>
+                {showDropdown && emailSearch && filteredCustomers.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredCustomers.slice(0, 10).map(c => (
+                      <button key={c._id} type="button" onClick={() => selectEmail(c)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
+                        <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                        <p className="text-xs text-gray-500">{c.email}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {showDropdown && emailSearch && filteredCustomers.length === 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                    <p className="text-sm text-gray-500 text-center">No customers found</p>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">SuperCoins *</label>
@@ -225,6 +346,68 @@ export default function AdminSuperCoinsPage() {
                   modal === "add" ? "bg-[#C9956B] hover:bg-[#A67050]" : "bg-red-600 hover:bg-red-700"
                 }`}>
                 {saving ? "Processing..." : modal === "add" ? "Add SuperCoins" : "Redeem SuperCoins"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {modal === "edit" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setModal(null)}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Edit SuperCoins & Total Spent</h2>
+              <button onClick={() => setModal(null)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              <div ref={editDropdownRef} className="relative">
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Customer Email *</label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    required
+                    value={editEmailSearch}
+                    onChange={e => {
+                      setEditEmailSearch(e.target.value);
+                      setEditForm({ ...editForm, email: e.target.value });
+                      setShowEditDropdown(true);
+                    }}
+                    onFocus={() => setShowEditDropdown(true)}
+                    placeholder="Search by name or email"
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]"
+                  />
+                </div>
+                {showEditDropdown && editEmailSearch && filteredEditCustomers.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredEditCustomers.slice(0, 10).map(c => (
+                      <button key={c._id} type="button" onClick={() => selectEditEmail(c)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
+                        <p className="text-sm font-medium text-gray-900">{c.name}</p>
+                        <p className="text-xs text-gray-500">{c.email}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {showEditDropdown && editEmailSearch && filteredEditCustomers.length === 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                    <p className="text-sm text-gray-500 text-center">No customers found</p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">SuperCoins *</label>
+                <input required type="number" min="0" value={editForm.superCoins} onChange={e => setEditForm({...editForm, superCoins: e.target.value})}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Total Spent (₹) *</label>
+                <input required type="number" min="0" value={editForm.totalSpent} onChange={e => setEditForm({...editForm, totalSpent: e.target.value})}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" />
+              </div>
+              <button type="submit" disabled={saving || !editForm.email}
+                className="w-full py-2.5 rounded-lg text-sm font-medium text-white disabled:opacity-50 bg-[#C9956B] hover:bg-[#A67050]">
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </form>
           </div>

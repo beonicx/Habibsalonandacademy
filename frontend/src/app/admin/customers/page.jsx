@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, X, Loader, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Plus, X, Loader, ChevronLeft, ChevronRight, Crown } from "lucide-react";
 import { customers } from "../../../lib/adminApi";
 
 export default function CustomersPage() {
@@ -137,10 +137,15 @@ export default function CustomersPage() {
                     >
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-rose-gold/10 text-rose-gold flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                            {c.name?.charAt(0)?.toUpperCase() || "?"}
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${c.activeMembership ? "bg-amber-100 text-amber-700" : "bg-rose-gold/10 text-rose-gold"}`}>
+                            {c.activeMembership ? <Crown size={14} /> : (c.name?.charAt(0)?.toUpperCase() || "?")}
                           </div>
-                          <span className="font-medium text-gray-900">{c.name}</span>
+                          <div>
+                            <span className="font-medium text-gray-900">{c.name}</span>
+                            {c.activeMembership && (
+                              <p className="text-[10px] text-amber-600 font-medium">{c.activeMembership.planName} Member</p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-5 py-3 text-gray-700">{c.email}</td>

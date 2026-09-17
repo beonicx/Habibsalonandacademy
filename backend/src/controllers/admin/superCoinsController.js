@@ -80,24 +80,33 @@ async function getUserPoints(req, res) {
 
 async function addPoints(req, res) {
   try {
-    const { userId, points, source = "manual", description } = req.body;
+    const { email, userId, points, source = "manual", description } = req.body;
 
-    if (!userId || !points || points <= 0) {
-      return res.status(400).json({ error: "Valid userId and positive points are required" });
+    if ((!email && !userId) || !points || points <= 0) {
+      return res.status(400).json({ error: "Valid email (or userId) and positive points are required" });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $inc: { superCoins: points } },
-      { new: true }
-    );
+    let user;
+    if (email) {
+      user = await User.findOneAndUpdate(
+        { email: email.toLowerCase().trim() },
+        { $inc: { superCoins: points } },
+        { new: true }
+      );
+    } else {
+      user = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { superCoins: points } },
+        { new: true }
+      );
+    }
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     await SuperCoinTransaction.create({
-      user: userId,
+      user: user._id,
       points,
       type: "earned",
       source,
@@ -106,7 +115,7 @@ async function addPoints(req, res) {
     });
 
     await Notification.create({
-      user: userId,
+      user: user._id,
       title: "SuperCoins Earned",
       message: `You earned ${points} SuperCoins! Current balance: ${user.superCoins}`,
       type: "supercoins",
@@ -121,13 +130,19 @@ async function addPoints(req, res) {
 
 async function redeemPoints(req, res) {
   try {
-    const { userId, points, description } = req.body;
+    const { email, userId, points, description } = req.body;
 
-    if (!userId || !points || points <= 0) {
-      return res.status(400).json({ error: "Valid userId and positive points are required" });
+    if ((!email && !userId) || !points || points <= 0) {
+      return res.status(400).json({ error: "Valid email (or userId) and positive points are required" });
     }
 
-    const user = await User.findById(userId);
+    let user;
+    if (email) {
+      user = await User.findOne({ email: email.toLowerCase().trim() });
+    } else {
+      user = await User.findById(userId);
+    }
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -140,7 +155,7 @@ async function redeemPoints(req, res) {
     await user.save();
 
     await SuperCoinTransaction.create({
-      user: userId,
+      user: user._id,
       points,
       type: "redeemed",
       source: "redemption",
@@ -149,7 +164,7 @@ async function redeemPoints(req, res) {
     });
 
     await Notification.create({
-      user: userId,
+      user: user._id,
       title: "SuperCoins Redeemed",
       message: `You redeemed ${points} SuperCoins. Remaining balance: ${user.superCoins}`,
       type: "supercoins",
@@ -178,10 +193,73 @@ async function getLeaderboard(req, res) {
   }
 }
 
+async function editUserCoins(req, res) {
+  try {
+    const { email, superCoins, totalSpent } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const updates = {};
+    if (superCoins !== undefined && superCoins !== null) updates.superCoins = Number(superCoins);
+    if (totalSpent !== undefined && totalSpent !== null) updates.totalSpent = Number(totalSpent);
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "Provide superCoins or totalSpent to update" });
+    }
+
+    const oldUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!oldUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const oldBalance = oldUser.superCoins;
+    const user = await User.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (updates.superCoins !== undefined) {
+      const diff = updates.superCoins - oldBalance;
+      await SuperCoinTransaction.create({
+        user: user._id,
+        points: Math.abs(diff),
+        type: diff >= 0 ? "earned" : "redeemed",
+        source: "manual",
+        description: `Admin adjusted SuperCoins from ${oldBalance} to ${updates.superCoins}`,
+        balanceAfter: user.superCoins,
+      });
+    }
+
+    res.json({ success: true, data: { superCoins: user.superCoins, totalSpent: user.totalSpent } });
+  } catch (err) {
+    console.error("Edit user coins error:", err);
+    res.status(500).json({ error: "Failed to update user coins" });
+  }
+}
+
+async function getCustomerEmails(req, res) {
+  try {
+    const customers = await User.find({ role: "user", isActive: true })
+      .select("name email")
+      .sort({ name: 1 })
+      .lean();
+
+    res.json({ success: true, data: customers });
+  } catch (err) {
+    console.error("Get customer emails error:", err);
+    res.status(500).json({ error: "Failed to fetch customer emails" });
+  }
+}
+
 module.exports = {
   getTransactions,
   getUserPoints,
   addPoints,
   redeemPoints,
   getLeaderboard,
+  editUserCoins,
+  getCustomerEmails,
 };

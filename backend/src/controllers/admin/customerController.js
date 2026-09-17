@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const Booking = require("../../models/Booking");
 const Payment = require("../../models/Payment");
 const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
+const Membership = require("../../models/Membership");
 
 async function getAllCustomers(req, res) {
   try {
@@ -34,9 +35,28 @@ async function getAllCustomers(req, res) {
       User.countDocuments(filter),
     ]);
 
+    const customerIds = customers.map((c) => c._id);
+    const activeMemberships = await Membership.find({
+      user: { $in: customerIds },
+      status: "active",
+    })
+      .populate("plan", "name")
+      .lean();
+
+    const membershipMap = {};
+    for (const m of activeMemberships) {
+      membershipMap[m.user.toString()] = { planName: m.plan?.name, endDate: m.endDate };
+    }
+
+    const enriched = customers.map((c) => {
+      const obj = c.toJSON();
+      obj.activeMembership = membershipMap[c._id.toString()] || null;
+      return obj;
+    });
+
     res.json({
       success: true,
-      data: customers,
+      data: enriched,
       pagination: {
         page: Number(page),
         limit: Number(limit),

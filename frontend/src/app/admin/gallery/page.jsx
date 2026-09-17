@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Pencil, Trash2, X, Loader, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader, ImageIcon, Upload, Link2 } from "lucide-react";
 import { gallery } from "../../../lib/adminApi";
 
 const CATEGORIES = ["hair", "skin", "makeup", "nails", "spa"];
@@ -16,6 +16,9 @@ export default function AdminGalleryPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [imageMode, setImageMode] = useState("upload");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -33,27 +36,64 @@ export default function AdminGalleryPage() {
 
   function openAdd() {
     setForm(emptyForm);
+    setImageMode("upload");
+    setImageFile(null);
+    setImagePreview("");
     setModal("add");
   }
 
   function openEdit(img) {
     setForm({ title: img.title, category: img.category, image: img.image, description: img.description || "" });
+    setImageMode("url");
+    setImageFile(null);
+    setImagePreview(img.image || "");
     setModal(img._id);
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size must be under 5MB");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setForm((f) => ({ ...f, image: "" }));
+  }
+
+  function clearImage() {
+    setImageFile(null);
+    setImagePreview("");
+    setForm((f) => ({ ...f, image: "" }));
   }
 
   async function handleSave(e) {
     e.preventDefault();
+    if (!imageFile && !form.image) {
+      setError("Please upload an image or provide a URL");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
+      let imageUrl = form.image;
+      if (imageFile) {
+        const uploadRes = await gallery.upload(imageFile);
+        if (!uploadRes.success) throw new Error(uploadRes.error || "Upload failed");
+        imageUrl = uploadRes.url;
+      }
+      const payload = { ...form, image: imageUrl };
       if (modal === "add") {
-        await gallery.create(form);
+        await gallery.create(payload);
       } else {
-        await gallery.update(modal, form);
+        await gallery.update(modal, payload);
       }
       setModal(null);
+      setImageFile(null);
+      setImagePreview("");
       await load();
-    } catch { setError("Failed to save"); }
+    } catch (err) { setError(err.message || "Failed to save"); }
     finally { setSaving(false); }
   }
 
@@ -160,9 +200,43 @@ export default function AdminGalleryPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Image URL *</label>
-                <input required value={form.image} onChange={e => setForm({...form, image: e.target.value})}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="https://..." />
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-2">Image *</label>
+                <div className="flex gap-2 mb-3">
+                  <button type="button" onClick={() => { setImageMode("upload"); setForm((f) => ({ ...f, image: "" })); }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-colors ${imageMode === "upload" ? "bg-[#C9956B] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                    <Upload size={12} /> Upload File
+                  </button>
+                  <button type="button" onClick={() => { setImageMode("url"); setImageFile(null); }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-colors ${imageMode === "url" ? "bg-[#C9956B] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+                    <Link2 size={12} /> Image URL
+                  </button>
+                </div>
+                {imageMode === "upload" ? (
+                  <label className="block border-2 border-dashed border-gray-200 rounded-lg p-5 text-center cursor-pointer hover:border-[#C9956B] transition-colors">
+                    <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleFileSelect} className="hidden" />
+                    {imageFile ? (
+                      <p className="text-sm text-gray-800 truncate">{imageFile.name}</p>
+                    ) : (
+                      <>
+                        <Upload size={22} className="mx-auto text-gray-400 mb-1.5" />
+                        <p className="text-sm text-gray-600">Click to choose a file</p>
+                        <p className="text-[11px] text-gray-400 mt-1">JPG, PNG, GIF, WebP — max 5 MB</p>
+                      </>
+                    )}
+                  </label>
+                ) : (
+                  <input value={form.image} onChange={e => { setForm({...form, image: e.target.value}); setImagePreview(e.target.value); }}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]" placeholder="https://..." />
+                )}
+                {imagePreview && (
+                  <div className="mt-3 relative">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-gray-200" />
+                    <button type="button" onClick={clearImage}
+                      className="absolute top-1.5 right-1.5 p-1 bg-white/90 rounded-full shadow hover:bg-white">
+                      <X size={14} className="text-gray-600" />
+                    </button>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Description</label>

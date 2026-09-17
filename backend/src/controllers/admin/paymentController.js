@@ -78,55 +78,62 @@ async function createPayment(req, res) {
       return res.status(400).json({ error: "Amount and method are required" });
     }
 
-    const payment = await Payment.create({
-      user: userId || undefined,
-      booking: bookingId || undefined,
-      amount,
-      method,
-      transactionId,
-      notes,
-      status: "completed",
-    });
+    const doc = { amount, method, status: "completed" };
+    if (userId) doc.user = userId;
+    if (bookingId) doc.booking = bookingId;
+    if (transactionId) doc.transactionId = transactionId;
+    if (notes) doc.notes = notes;
 
-    if (bookingId) {
-      await Booking.findByIdAndUpdate(bookingId, { paymentStatus: "paid" });
-    }
+    const payment = await Payment.create(doc);
 
-    if (userId) {
-      await User.findByIdAndUpdate(userId, { $inc: { totalSpent: amount } });
-
-      const pointsEarned = Math.floor(amount / 10);
-      if (pointsEarned > 0) {
-        const user = await User.findByIdAndUpdate(
-          userId,
-          { $inc: { superCoins: pointsEarned } },
-          { new: true }
-        );
-
-        await SuperCoinTransaction.create({
-          user: userId,
-          points: pointsEarned,
-          type: "earned",
-          source: "booking",
-          referenceId: payment._id,
-          referenceModel: "Payment",
-          description: `Earned ${pointsEarned} SuperCoins for payment of ${amount}`,
-          balanceAfter: user.superCoins,
-        });
+    try {
+      if (bookingId) {
+        await Booking.findByIdAndUpdate(bookingId, { paymentStatus: "paid" });
       }
 
-      await Notification.create({
-        user: userId,
-        title: "Payment Received",
-        message: `Payment of ${amount} received via ${method}. ${pointsEarned > 0 ? `You earned ${pointsEarned} SuperCoins!` : ""}`,
-        type: "payment",
-      });
+      if (userId) {
+        await User.findByIdAndUpdate(userId, { $inc: { totalSpent: amount } });
+
+        const pointsEarned = Math.floor(amount / 10);
+        if (pointsEarned > 0) {
+          const user = await User.findByIdAndUpdate(
+            userId,
+            { $inc: { superCoins: pointsEarned } },
+            { new: true }
+          );
+
+          if (user) {
+            await SuperCoinTransaction.create({
+              user: userId,
+              points: pointsEarned,
+              type: "earned",
+              source: "booking",
+              referenceId: payment._id,
+              referenceModel: "Payment",
+              description: `Earned ${pointsEarned} SuperCoins for payment of ₹${amount}`,
+              balanceAfter: user.superCoins,
+            });
+          }
+        }
+
+        await Notification.create({
+          user: userId,
+          title: "Payment Received",
+          message: `Payment of ₹${amount} received via ${method}.${pointsEarned > 0 ? ` You earned ${pointsEarned} SuperCoins!` : ""}`,
+          type: "payment",
+        });
+      }
+    } catch (sideErr) {
+      console.error("Payment side-effect error (payment was created):", sideErr);
     }
 
     res.status(201).json({ success: true, data: payment });
   } catch (err) {
     console.error("Create payment error:", err);
-    res.status(500).json({ error: "Failed to create payment" });
+    const message = err.name === "ValidationError"
+      ? Object.values(err.errors).map((e) => e.message).join(", ")
+      : "Failed to create payment";
+    res.status(err.name === "ValidationError" ? 400 : 500).json({ error: message });
   }
 }
 

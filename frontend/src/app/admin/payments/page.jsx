@@ -58,6 +58,8 @@ export default function PaymentsPage() {
       if (res.success) {
         setItems(res.data || []);
         setPagination(res.pagination || { page: 1, pages: 1, total: 0 });
+      } else {
+        setError(res.error || "Failed to load payments");
       }
     } catch {
       setError("Failed to load payments");
@@ -71,6 +73,7 @@ export default function PaymentsPage() {
   async function handleCreate(e) {
     e.preventDefault();
     setSaving(true);
+    setError("");
     try {
       const payload = {
         amount: Number(createForm.amount),
@@ -80,12 +83,13 @@ export default function PaymentsPage() {
       if (createForm.userId) payload.userId = createForm.userId;
       if (createForm.transactionId) payload.transactionId = createForm.transactionId;
       if (createForm.notes) payload.notes = createForm.notes;
-      await payments.create(payload);
+      const res = await payments.create(payload);
+      if (!res.success) throw new Error(res.error || "Failed to record payment");
       setModal(null);
       setCreateForm({ amount: "", method: "cash", bookingId: "", userId: "", transactionId: "", notes: "" });
       load();
-    } catch {
-      setError("Failed to record payment");
+    } catch (err) {
+      setError(err.message || "Failed to record payment");
     } finally {
       setSaving(false);
     }
@@ -94,15 +98,17 @@ export default function PaymentsPage() {
   async function handleRefund(e) {
     e.preventDefault();
     setSaving(true);
+    setError("");
     try {
-      await payments.refund(refundForm.paymentId, {
+      const res = await payments.refund(refundForm.paymentId, {
         amount: Number(refundForm.amount),
         reason: refundForm.reason,
       });
+      if (!res.success) throw new Error(res.error || "Failed to process refund");
       setModal(null);
       load();
-    } catch {
-      setError("Failed to process refund");
+    } catch (err) {
+      setError(err.message || "Failed to process refund");
     } finally {
       setSaving(false);
     }

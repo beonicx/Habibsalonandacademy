@@ -105,6 +105,8 @@ export const superCoins = {
   addPoints: (data) => adminFetch("/admin/supercoins/add", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
   redeemPoints: (data) => adminFetch("/admin/supercoins/redeem", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
   getLeaderboard: (params) => adminFetch(`/admin/supercoins/leaderboard${qs(params)}`).then((r) => r.json()),
+  editCoins: (data) => adminFetch("/admin/supercoins/edit", { method: "PUT", body: JSON.stringify(data) }).then((r) => r.json()),
+  getCustomerEmails: () => adminFetch("/admin/supercoins/customers").then((r) => r.json()),
 };
 
 export const products = {
@@ -124,6 +126,11 @@ export const gallery = {
   update: (id, data) => adminFetch(`/admin/gallery/${id}`, { method: "PUT", body: JSON.stringify(data) }).then((r) => r.json()),
   delete: (id) => adminFetch(`/admin/gallery/${id}`, { method: "DELETE" }).then((r) => r.json()),
   reorder: (items) => adminFetch("/admin/gallery/reorder", { method: "POST", body: JSON.stringify({ items }) }).then((r) => r.json()),
+  upload: (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    return adminFetch("/admin/gallery/upload", { method: "POST", body: formData }).then((r) => r.json());
+  },
 };
 
 export const contacts = {

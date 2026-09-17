@@ -6,37 +6,25 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 const categories = ["all", "hair", "skin", "makeup", "nails", "spa"];
 
-const staticGallery = [
-  { id: 1, category: "hair", title: "Balayage Transformation", src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80" },
-  { id: 2, category: "hair", title: "Sleek Blowout", src: "https://images.unsplash.com/photo-1620331311520-246422fd82f9?w=600&q=80" },
-  { id: 3, category: "hair", title: "Vibrant Colour", src: "https://images.unsplash.com/photo-1692318431350-1c97e0ba0dbc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fG5hdHVyYWwlMjBmaW5pc2glMjBtYWtldXAlMjB2aWJyYW50fGVufDB8fDB8fHww" },
-  { id: 4, category: "skin", title: "Luxury Facial", src: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80" },
-  { id: 5, category: "skin", title: "Glow Treatment", src: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=600&q=80" },
-  { id: 6, category: "makeup", title: "Bridal Look", src: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=600&q=80" },
-  { id: 7, category: "makeup", title: "Evening Glam", src: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=600&q=80" },
-  { id: 8, category: "nails", title: "Nail Art", src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80" },
-  { id: 9, category: "spa", title: "Relaxing Massage", src: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80" },
-  { id: 10, category: "hair", title: "Precision Cut", src: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80" },
-  { id: 11, category: "skin", title: "Skincare Ritual", src: "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=600&q=80" },
-  { id: 12, category: "makeup", title: "Natural Finish", src: "https://images.unsplash.com/photo-1562861021-c1ced7930457?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8bmF0dXJhbCUyMGZpbmlzaCUyMG1ha2V1cHxlbnwwfHwwfHx8MA%3D%3D" },
-];
-
 export default function GalleryPage() {
   const [active, setActive] = useState("all");
-  const [gallery, setGallery] = useState(staticGallery);
+  const [gallery, setGallery] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch(`${API_BASE}/gallery`);
-        if (!res.ok) return;
+        if (!res.ok) { setError(true); return; }
         const json = await res.json();
-        if (json.success && json.data?.length > 0) {
-          setGallery(json.data);
+        if (json.success) {
+          setGallery(json.data || []);
+        } else {
+          setError(true);
         }
       } catch {
-        // keep static fallback
+        setError(true);
       } finally {
         setLoaded(true);
       }
@@ -76,6 +64,12 @@ export default function GalleryPage() {
         {!loaded ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-2 border-rose-gold border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : error || filtered.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="font-body text-mocha/60">
+              {error ? "Unable to load gallery. Please try again later." : "No images found in this category."}
+            </p>
           </div>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">

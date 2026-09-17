@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { Crown, Plus, Pencil, Trash2, X, Loader, ChevronLeft, ChevronRight, XCircle } from "lucide-react";
-import { memberships } from "../../../lib/adminApi";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Crown, Plus, Pencil, Trash2, X, Loader, ChevronLeft, ChevronRight, XCircle, Search, UserPlus } from "lucide-react";
+import { memberships, customers } from "../../../lib/adminApi";
 
 const emptyPlan = { name: "", description: "", price: "", durationMonths: "", discountPercent: "", benefits: "" };
 
@@ -17,6 +17,16 @@ export default function AdminMembershipsPage() {
   const [planForm, setPlanForm] = useState(emptyPlan);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  const [assignModal, setAssignModal] = useState(false);
+  const [emailQuery, setEmailQuery] = useState("");
+  const [userResults, setUserResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [assigning, setAssigning] = useState(false);
+  const searchTimer = useRef(null);
 
   const loadPlans = useCallback(async () => {
     try {
@@ -98,6 +108,47 @@ export default function AdminMembershipsPage() {
     } catch { setError("Failed to cancel membership"); }
   }
 
+  function openAssign() {
+    setAssignModal(true);
+    setEmailQuery("");
+    setUserResults([]);
+    setSelectedUser(null);
+    setSelectedPlan(plans[0]?._id || "");
+    setPaymentMethod("cash");
+  }
+
+  function handleEmailSearch(value) {
+    setEmailQuery(value);
+    setSelectedUser(null);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (value.length < 2) { setUserResults([]); return; }
+    searchTimer.current = setTimeout(async () => {
+      setSearchingUsers(true);
+      try {
+        const res = await customers.getAll({ search: value, limit: 6 });
+        if (res.success) setUserResults(res.data || []);
+      } catch { /* ignore */ }
+      finally { setSearchingUsers(false); }
+    }, 300);
+  }
+
+  async function handleAssign(e) {
+    e.preventDefault();
+    if (!selectedUser || !selectedPlan) {
+      setError("Please select a user and plan");
+      return;
+    }
+    setAssigning(true);
+    setError("");
+    try {
+      const res = await memberships.assign({ userId: selectedUser._id, planId: selectedPlan, paymentMethod });
+      if (!res.success) throw new Error(res.error || "Failed to assign membership");
+      setAssignModal(false);
+      await loadMembers();
+    } catch (err) { setError(err.message || "Failed to assign membership"); }
+    finally { setAssigning(false); }
+  }
+
   const statusStyle = {
     active: "bg-green-100 text-green-700",
     expired: "bg-gray-100 text-gray-700",
@@ -164,7 +215,12 @@ export default function AdminMembershipsPage() {
 
       {/* Members Section */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Members</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Members</h2>
+          <button onClick={openAssign} className="inline-flex items-center gap-2 bg-[#C9956B] text-white px-4 py-2 rounded-lg hover:bg-[#A67050] text-sm font-medium">
+            <UserPlus size={16} /> Assign Membership
+          </button>
+        </div>
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           {loadingMembers ? (
             <div className="flex justify-center py-10"><Loader size={24} className="animate-spin text-[#C9956B]" /></div>
@@ -290,6 +346,100 @@ export default function AdminMembershipsPage() {
               <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
               <button onClick={() => handleDeletePlan(deleteConfirm)} className="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">Delete</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Membership Modal */}
+      {assignModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setAssignModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Assign Membership</h2>
+              <button onClick={() => setAssignModal(false)} className="text-gray-500 hover:text-gray-700"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAssign} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Search User by Email *</label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    value={emailQuery}
+                    onChange={(e) => handleEmailSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]"
+                    placeholder="Type email to search users..."
+                    autoFocus
+                  />
+                  {searchingUsers && <Loader size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />}
+                </div>
+                {userResults.length > 0 && !selectedUser && (
+                  <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto bg-white shadow-sm">
+                    {userResults.map((u) => (
+                      <button
+                        key={u._id}
+                        type="button"
+                        onClick={() => { setSelectedUser(u); setEmailQuery(u.email); setUserResults([]); }}
+                        className="w-full px-3 py-2.5 text-left hover:bg-gray-50 flex items-center justify-between border-b border-gray-100 last:border-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{u.name}</p>
+                          <p className="text-xs text-gray-500">{u.email}</p>
+                        </div>
+                        {u.phone && <span className="text-xs text-gray-400">{u.phone}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {selectedUser && (
+                  <div className="mt-2 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-green-800">{selectedUser.name}</p>
+                      <p className="text-xs text-green-600">{selectedUser.email}{selectedUser.phone ? ` · ${selectedUser.phone}` : ""}</p>
+                    </div>
+                    <button type="button" onClick={() => { setSelectedUser(null); setEmailQuery(""); }} className="text-green-600 hover:text-green-800">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Plan *</label>
+                <select
+                  required
+                  value={selectedPlan}
+                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]"
+                >
+                  <option value="">Select a plan</option>
+                  {plans.filter((p) => p.isActive).map((p) => (
+                    <option key={p._id} value={p._id}>{p.name} — ₹{p.price} / {p.durationMonths} mo</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Payment Method</label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#C9956B]"
+                >
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="upi">UPI</option>
+                  <option value="bank-transfer">Bank Transfer</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={assigning || !selectedUser || !selectedPlan}
+                className="w-full bg-[#C9956B] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#A67050] disabled:opacity-50"
+              >
+                {assigning ? "Assigning..." : "Assign Membership"}
+              </button>
+            </form>
           </div>
         </div>
       )}

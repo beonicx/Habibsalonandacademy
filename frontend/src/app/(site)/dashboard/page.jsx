@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Mail, Phone, Edit3, Check, LogOut, Calendar, Scissors, ShoppingBag, Ticket, Coins, Lock, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Phone, Edit3, Check, LogOut, Calendar, Scissors, ShoppingBag, Ticket, Coins, Lock, Eye, EyeOff, Crown } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function DashboardPage() {
@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [coinBalance, setCoinBalance] = useState(null);
+  const [membership, setMembership] = useState(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,6 +37,12 @@ export default function DashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setCoinBalance(data.data.balance);
+      })
+      .catch(() => {});
+    authFetch("/memberships/my")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) setMembership(data.data);
       })
       .catch(() => {});
   }, [user, authFetch]);
@@ -145,6 +152,12 @@ export default function DashboardPage() {
             <Calendar size={14} />
             Member since {memberSince}
           </p>
+          {membership && (
+            <div className="mt-3 inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-1.5 rounded-full">
+              <Crown size={14} className="text-amber-500" />
+              <span className="font-sans text-xs font-semibold tracking-wide uppercase">{membership.plan?.name} Member</span>
+            </div>
+          )}
         </div>
 
         {/* Profile Card */}
@@ -247,6 +260,38 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Membership Card */}
+        {membership && (
+          <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-lg border border-amber-200 overflow-hidden mt-6">
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center">
+                  <Crown size={20} className="text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base text-espresso">{membership.plan?.name}</h3>
+                  <p className="font-sans text-xs text-mocha">
+                    Valid until {new Date(membership.endDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                </div>
+              </div>
+              {membership.plan?.discountPercent > 0 && (
+                <div className="text-right">
+                  <p className="font-display text-2xl text-amber-700">{membership.plan.discountPercent}%</p>
+                  <p className="font-sans text-[10px] uppercase tracking-wider text-amber-600">discount</p>
+                </div>
+              )}
+            </div>
+            {membership.plan?.benefits?.length > 0 && (
+              <div className="px-6 pb-4 flex flex-wrap gap-2">
+                {membership.plan.benefits.map((b, i) => (
+                  <span key={i} className="font-sans text-[11px] bg-white/70 text-amber-800 px-2.5 py-1 rounded-full border border-amber-200">{b}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Change Password */}
         {!isGoogleOnly && (

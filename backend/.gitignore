@@ -11,5 +11,9 @@ node_modules
 # debug
 npm-debug.log*
 
+# uploads
+uploads/*
+!uploads/.gitkeep
+
 # misc
 .DS_Store
