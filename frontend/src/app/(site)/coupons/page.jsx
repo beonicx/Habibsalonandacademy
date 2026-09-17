@@ -35,7 +35,7 @@ export default function CouponsPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-24">
+      <div className="min-h-screen flex items-center justify-center pt-16">
         <div className="w-8 h-8 border-2 border-rose-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -55,7 +55,7 @@ export default function CouponsPage() {
   }
 
   return (
-    <section className="min-h-screen pt-32 pb-20 px-6">
+    <section className="min-h-screen pt-20 pb-20 px-6">
       <div className="max-w-3xl mx-auto">
         <Link
           href="/dashboard"

@@ -260,7 +260,7 @@ function BookingContent() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="pt-24">
+    <div className="pt-16">
       <div className="bg-espresso text-cream py-20 px-6 text-center">
         <p className="font-sans text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">
           Reserve Your Spot
