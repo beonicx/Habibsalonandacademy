@@ -12,19 +12,112 @@ const transporter = nodemailer.createTransport({
 
 const sendBookingNotification = async (booking) => {
   try {
+    const bookingDate = new Date(booking.date);
+    const formattedDate = bookingDate.toLocaleDateString("en-IN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
     const salonMail = transporter.sendMail({
       from: `"Habib Salon and Academy" <${process.env.SMTP_USER}>`,
       to: process.env.SALON_EMAIL,
-      subject: "📅 New Booking Received",
+      subject: `New Booking – ${booking.name} | ${booking.service}`,
       html: `
-        <h2>New Booking</h2>
-        <p><strong>Name:</strong> ${booking.name}</p>
-        <p><strong>Email:</strong> ${booking.email}</p>
-        <p><strong>Phone:</strong> ${booking.phone}</p>
-        <p><strong>Service:</strong> ${booking.service}</p>
-        <p><strong>Date:</strong> ${booking.date}</p>
-        <p><strong>Time:</strong> ${booking.time}</p>
-        <p><strong>Notes:</strong> ${booking.notes}</p>
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 28px 32px; border-radius: 8px 8px 0 0;">
+            <table width="100%" cellpadding="0" cellspacing="0"><tr>
+              <td><h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 600;">Habib Salon and Academy</h1></td>
+              <td align="right"><span style="background: #e94560; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">NEW BOOKING</span></td>
+            </tr></table>
+          </div>
+
+          <!-- Body -->
+          <div style="border: 1px solid #e8e8e8; border-top: none; border-radius: 0 0 8px 8px; padding: 0;">
+
+            <!-- Quick Summary Bar -->
+            <div style="background: #f0f4ff; padding: 16px 32px; border-bottom: 1px solid #e8e8e8;">
+              <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td style="font-size: 14px; color: #555;"><strong style="color: #1a1a2e;">${booking.name}</strong> booked <strong style="color: #1a1a2e;">${booking.service}</strong></td>
+                <td align="right" style="font-size: 13px; color: #888;">Just now</td>
+              </tr></table>
+            </div>
+
+            <!-- Customer Details -->
+            <div style="padding: 24px 32px 0;">
+              <h3 style="margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 600;">Customer Details</h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 14px;">
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; width: 36px; vertical-align: top;">
+                    <span style="font-size: 16px;">&#128100;</span>
+                  </td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #777; width: 80px;">Name</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a2e; font-weight: 600;">${booking.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; vertical-align: top;">
+                    <span style="font-size: 16px;">&#9993;</span>
+                  </td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #777;">Email</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a2e;">
+                    <a href="mailto:${booking.email}" style="color: #3366cc; text-decoration: none;">${booking.email}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; vertical-align: top;">
+                    <span style="font-size: 16px;">&#128222;</span>
+                  </td>
+                  <td style="padding: 10px 0; color: #777;">Phone</td>
+                  <td style="padding: 10px 0; color: #1a1a2e;">
+                    <a href="tel:${booking.phone}" style="color: #3366cc; text-decoration: none;">${booking.phone}</a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Appointment Details -->
+            <div style="padding: 24px 32px 0;">
+              <h3 style="margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 600;">Appointment Details</h3>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="width: 50%; padding-right: 8px;">
+                    <div style="background: #f8f9fc; border-radius: 8px; padding: 16px; text-align: center;">
+                      <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Service</div>
+                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${booking.service}</div>
+                    </div>
+                  </td>
+                  <td style="width: 50%; padding-left: 8px;">
+                    <div style="background: #f8f9fc; border-radius: 8px; padding: 16px; text-align: center;">
+                      <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Time Slot</div>
+                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${booking.time}</div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <div style="margin-top: 12px; background: #f8f9fc; border-radius: 8px; padding: 16px; text-align: center;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Date</div>
+                <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${formattedDate}</div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            ${booking.notes ? `
+            <div style="padding: 24px 32px 0;">
+              <h3 style="margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 600;">Customer Notes</h3>
+              <div style="background: #fffbf0; border-left: 3px solid #f5a623; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 14px; color: #555; line-height: 1.5;">
+                ${booking.notes}
+              </div>
+            </div>
+            ` : ""}
+
+            <!-- Footer -->
+            <div style="padding: 24px 32px; margin-top: 24px; border-top: 1px solid #f0f0f0; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #bbb;">This is an automated notification from your booking system.</p>
+            </div>
+          </div>
+        </div>
       `,
     });
 
