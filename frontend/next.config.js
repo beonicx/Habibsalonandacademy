@@ -41,7 +41,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "connect-src 'self' https://accounts.google.com https://*.habibsalonacademy.com https://*.ellieshairbeauty.com",
+              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : 'http://localhost:5001'} https://accounts.google.com https://*.habibsalonacademy.com https://*.ellieshairbeauty.com`,
               "frame-src https://accounts.google.com https://api.razorpay.com",
               "object-src 'none'",
               "base-uri 'self'",

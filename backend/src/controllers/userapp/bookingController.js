@@ -1,6 +1,7 @@
 const Booking = require("../../models/Booking");
 const User = require("../../models/User");
 const Coupon = require("../../models/Coupon");
+const Service = require("../../models/Service");
 const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 const Notification = require("../../models/Notification");
 const { sendBookingNotification } = require("../../services/emailService");
@@ -47,7 +48,12 @@ const createBooking = async (req, res) => {
       appliedCouponCode = coupon.code;
 
       if (coupon.discountType === "percentage") {
-        couponDiscount = coupon.discountValue;
+        let servicePrice = 0;
+        if (service) {
+          const svc = await Service.findOne({ name: { $regex: new RegExp(`^${service}$`, "i") }, isActive: true });
+          if (svc) servicePrice = svc.price;
+        }
+        couponDiscount = Math.round((servicePrice * coupon.discountValue) / 100);
         if (coupon.maxDiscount) couponDiscount = Math.min(couponDiscount, coupon.maxDiscount);
       } else {
         couponDiscount = coupon.discountValue;
@@ -143,11 +149,10 @@ const createBooking = async (req, res) => {
 
 const getAllBookings = async (req, res) => {
   try {
-    const filter = {};
-    if (req.user?.id) {
-      filter.user = req.user.id;
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, error: "Authentication required" });
     }
-    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+    const bookings = await Booking.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json({ success: true, data: bookings });
   } catch (err) {
     console.error("Get bookings error:", err);
@@ -171,10 +176,14 @@ const getBookingById = async (req, res) => {
 const updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
+    const validStatuses = ["pending", "confirmed", "in-progress", "completed", "cancelled", "no-show"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, error: "Invalid status" });
+    }
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!booking) {
       return res.status(404).json({ success: false, error: "Booking not found" });

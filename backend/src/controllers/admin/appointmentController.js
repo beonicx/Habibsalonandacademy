@@ -36,14 +36,15 @@ async function getAllAppointments(req, res) {
       ];
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    const cappedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+    const skip = (Number(page) - 1) * cappedLimit;
     const sort = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
 
     const [appointments, total] = await Promise.all([
       Booking.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(Number(limit))
+        .limit(cappedLimit)
         .populate("user", "name email phone"),
       Booking.countDocuments(filter),
     ]);
@@ -53,9 +54,9 @@ async function getAllAppointments(req, res) {
       data: appointments,
       pagination: {
         page: Number(page),
-        limit: Number(limit),
+        limit: cappedLimit,
         total,
-        pages: Math.ceil(total / Number(limit)),
+        pages: Math.ceil(total / cappedLimit),
       },
     });
   } catch (err) {
@@ -176,7 +177,7 @@ async function updateAppointment(req, res) {
     if (notes !== undefined) updates.notes = notes;
     if (status !== undefined) updates.status = status;
 
-    const appointment = await Booking.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const appointment = await Booking.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
@@ -191,6 +192,10 @@ async function updateAppointment(req, res) {
 async function updateAppointmentStatus(req, res) {
   try {
     const { status, cancellationReason } = req.body;
+    const validStatuses = ["pending", "confirmed", "in-progress", "completed", "cancelled", "no-show"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
     const updates = { status };
     if (cancellationReason) updates.cancellationReason = cancellationReason;
 
@@ -204,7 +209,7 @@ async function updateAppointmentStatus(req, res) {
       }
     }
 
-    const appointment = await Booking.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const appointment = await Booking.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }

@@ -25,7 +25,6 @@ const BLOCKED_UA_PATTERNS = [
   /\bYandexBot\b/i,
   /\bSogou/i,
   /\bBaidu/i,
-  /\bfacebookexternalhit/i,
   /\bApplebot\b/i,
   /\bDataForSeoBot\b/i,
   /\bHeadlessChrome\b/i,

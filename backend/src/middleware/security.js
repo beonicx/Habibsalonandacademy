@@ -1,6 +1,7 @@
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
+const logger = require("../config/logger");
 
 function securityHeaders() {
   return helmet({
@@ -31,7 +32,7 @@ function sanitizeInput() {
   return mongoSanitize({
     replaceWith: "_",
     onSanitize: ({ req, key }) => {
-      console.warn(`NoSQL injection attempt blocked from ${req.ip}: key=${key}`);
+      logger.warn({ ip: req.ip, key }, "NoSQL injection attempt blocked");
     },
   });
 }
@@ -66,9 +67,14 @@ function securityLogger(req, res, next) {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (res.statusCode >= 400) {
-      console.warn(
-        `[SECURITY] ${req.ip} ${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms UA="${(req.headers["user-agent"] || "").substring(0, 100)}"`
-      );
+      logger.warn({
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        status: res.statusCode,
+        duration,
+        ua: (req.headers["user-agent"] || "").substring(0, 100),
+      }, "Security event");
     }
   });
 
@@ -117,7 +123,7 @@ function recordFailedLogin(identifier) {
 
   if (data.attempts >= MAX_LOGIN_ATTEMPTS) {
     data.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
-    console.warn(`[SECURITY] Account locked: ${identifier} after ${data.attempts} failed attempts`);
+    logger.warn({ identifier, attempts: data.attempts }, "Account locked after failed attempts");
   }
 
   loginAttempts.set(identifier, data);
@@ -153,7 +159,7 @@ function recordFailedOtp(identifier) {
 
   if (data.attempts >= MAX_OTP_ATTEMPTS) {
     data.lockedUntil = Date.now() + OTP_LOCKOUT_MS;
-    console.warn(`[SECURITY] OTP locked: ${identifier} after ${data.attempts} failed attempts`);
+    logger.warn({ identifier, attempts: data.attempts }, "OTP locked after failed attempts");
   }
 
   otpAttempts.set(identifier, data);

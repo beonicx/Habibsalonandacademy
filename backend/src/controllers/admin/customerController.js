@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const User = require("../../models/User");
 const Booking = require("../../models/Booking");
 const Payment = require("../../models/Payment");
@@ -114,7 +115,7 @@ async function createCustomer(req, res) {
     const customer = await User.create({
       name,
       email,
-      password: password || "changeme123",
+      password: password || crypto.randomBytes(16).toString("hex"),
       phone,
       gender,
       dateOfBirth,

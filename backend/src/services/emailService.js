@@ -1,5 +1,14 @@
 const nodemailer = require("nodemailer");
 
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: process.env.SMTP_PORT,
@@ -20,10 +29,17 @@ const sendBookingNotification = async (booking) => {
       day: "numeric",
     });
 
+    const safeName = escapeHtml(booking.name);
+    const safeEmail = escapeHtml(booking.email);
+    const safePhone = escapeHtml(booking.phone);
+    const safeService = escapeHtml(booking.service);
+    const safeTime = escapeHtml(booking.time);
+    const safeNotes = escapeHtml(booking.notes);
+
     const salonMail = transporter.sendMail({
       from: `"Habib Salon and Academy" <${process.env.SMTP_USER}>`,
       to: process.env.SALON_EMAIL,
-      subject: `New Booking – ${booking.name} | ${booking.service}`,
+      subject: `New Booking – ${safeName} | ${safeService}`,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff;">
           <!-- Header -->
@@ -40,7 +56,7 @@ const sendBookingNotification = async (booking) => {
             <!-- Quick Summary Bar -->
             <div style="background: #f0f4ff; padding: 16px 32px; border-bottom: 1px solid #e8e8e8;">
               <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                <td style="font-size: 14px; color: #555;"><strong style="color: #1a1a2e;">${booking.name}</strong> booked <strong style="color: #1a1a2e;">${booking.service}</strong></td>
+                <td style="font-size: 14px; color: #555;"><strong style="color: #1a1a2e;">${safeName}</strong> booked <strong style="color: #1a1a2e;">${safeService}</strong></td>
                 <td align="right" style="font-size: 13px; color: #888;">Just now</td>
               </tr></table>
             </div>
@@ -54,7 +70,7 @@ const sendBookingNotification = async (booking) => {
                     <span style="font-size: 16px;">&#128100;</span>
                   </td>
                   <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #777; width: 80px;">Name</td>
-                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a2e; font-weight: 600;">${booking.name}</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a2e; font-weight: 600;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; vertical-align: top;">
@@ -62,7 +78,7 @@ const sendBookingNotification = async (booking) => {
                   </td>
                   <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #777;">Email</td>
                   <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #1a1a2e;">
-                    <a href="mailto:${booking.email}" style="color: #3366cc; text-decoration: none;">${booking.email}</a>
+                    <a href="mailto:${safeEmail}" style="color: #3366cc; text-decoration: none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
@@ -71,7 +87,7 @@ const sendBookingNotification = async (booking) => {
                   </td>
                   <td style="padding: 10px 0; color: #777;">Phone</td>
                   <td style="padding: 10px 0; color: #1a1a2e;">
-                    <a href="tel:${booking.phone}" style="color: #3366cc; text-decoration: none;">${booking.phone}</a>
+                    <a href="tel:${safePhone}" style="color: #3366cc; text-decoration: none;">${safePhone}</a>
                   </td>
                 </tr>
               </table>
@@ -85,13 +101,13 @@ const sendBookingNotification = async (booking) => {
                   <td style="width: 50%; padding-right: 8px;">
                     <div style="background: #f8f9fc; border-radius: 8px; padding: 16px; text-align: center;">
                       <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Service</div>
-                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${booking.service}</div>
+                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${safeService}</div>
                     </div>
                   </td>
                   <td style="width: 50%; padding-left: 8px;">
                     <div style="background: #f8f9fc; border-radius: 8px; padding: 16px; text-align: center;">
                       <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Time Slot</div>
-                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${booking.time}</div>
+                      <div style="font-size: 16px; font-weight: 700; color: #1a1a2e;">${safeTime}</div>
                     </div>
                   </td>
                 </tr>
@@ -107,7 +123,7 @@ const sendBookingNotification = async (booking) => {
             <div style="padding: 24px 32px 0;">
               <h3 style="margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 600;">Customer Notes</h3>
               <div style="background: #fffbf0; border-left: 3px solid #f5a623; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 14px; color: #555; line-height: 1.5;">
-                ${booking.notes}
+                ${safeNotes}
               </div>
             </div>
             ` : ""}
@@ -131,13 +147,13 @@ const sendBookingNotification = async (booking) => {
             <h1 style="margin: 0; font-size: 22px;">Habib Salon and Academy</h1>
           </div>
           <div style="padding: 24px;">
-            <p>Hi <strong>${booking.name}</strong>,</p>
+            <p>Hi <strong>${safeName}</strong>,</p>
             <p>Thank you for booking with us! Here are your appointment details:</p>
             <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-              <tr><td style="padding: 8px 0; color: #666;">Service</td><td style="padding: 8px 0; font-weight: bold;">${booking.service}</td></tr>
+              <tr><td style="padding: 8px 0; color: #666;">Service</td><td style="padding: 8px 0; font-weight: bold;">${safeService}</td></tr>
               <tr><td style="padding: 8px 0; color: #666;">Date</td><td style="padding: 8px 0; font-weight: bold;">${booking.date}</td></tr>
-              <tr><td style="padding: 8px 0; color: #666;">Time</td><td style="padding: 8px 0; font-weight: bold;">${booking.time}</td></tr>
-              ${booking.notes ? `<tr><td style="padding: 8px 0; color: #666;">Notes</td><td style="padding: 8px 0;">${booking.notes}</td></tr>` : ""}
+              <tr><td style="padding: 8px 0; color: #666;">Time</td><td style="padding: 8px 0; font-weight: bold;">${safeTime}</td></tr>
+              ${booking.notes ? `<tr><td style="padding: 8px 0; color: #666;">Notes</td><td style="padding: 8px 0;">${safeNotes}</td></tr>` : ""}
             </table>
             <p>We'll send you a reminder before your appointment. If you need to reschedule or cancel, please contact us.</p>
             <p style="margin-top: 24px;">See you soon!<br><strong>Habib Salon and Academy</strong></p>
@@ -165,6 +181,9 @@ const sendBookingNotification = async (booking) => {
 const sendAppointmentStatusEmail = async (appointment, status, cancellationReason) => {
   if (!appointment.customerEmail) return;
 
+  const safeName = escapeHtml(appointment.customerName);
+  const safeReason = escapeHtml(cancellationReason);
+
   const subjects = {
     confirmed: "✅ Your Appointment is Confirmed – Habib Salon and Academy",
     cancelled: "❌ Your Appointment has been Cancelled – Habib Salon and Academy",
@@ -173,18 +192,18 @@ const sendAppointmentStatusEmail = async (appointment, status, cancellationReaso
 
   const bodies = {
     confirmed: `
-      <p>Hi <strong>${appointment.customerName}</strong>,</p>
+      <p>Hi <strong>${safeName}</strong>,</p>
       <p>Great news! Your appointment on <strong>${new Date(appointment.date).toLocaleDateString()}</strong> at <strong>${appointment.timeSlot}</strong> has been confirmed.</p>
       <p>We look forward to seeing you!</p>
     `,
     cancelled: `
-      <p>Hi <strong>${appointment.customerName}</strong>,</p>
+      <p>Hi <strong>${safeName}</strong>,</p>
       <p>We're sorry to inform you that your appointment on <strong>${new Date(appointment.date).toLocaleDateString()}</strong> at <strong>${appointment.timeSlot}</strong> has been cancelled.</p>
-      ${cancellationReason ? `<p><strong>Reason:</strong> ${cancellationReason}</p>` : ""}
+      ${cancellationReason ? `<p><strong>Reason:</strong> ${safeReason}</p>` : ""}
       <p>Please feel free to book another appointment at your convenience.</p>
     `,
     completed: `
-      <p>Hi <strong>${appointment.customerName}</strong>,</p>
+      <p>Hi <strong>${safeName}</strong>,</p>
       <p>Thank you for visiting Habib Salon and Academy! We hope you had a wonderful experience.</p>
       <p>We'd love to see you again soon.</p>
     `,
