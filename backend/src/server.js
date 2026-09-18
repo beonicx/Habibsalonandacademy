@@ -4,6 +4,10 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
+const { securityHeaders, sanitizeInput, preventParameterPollution, requestSizeLimiter, securityLogger } = require("./middleware/security");
+const { globalLimiter } = require("./middleware/rateLimiter");
+const { botProtection, validateReferer } = require("./middleware/botProtection");
+
 const authRouter = require("./routes/userapp/auth");
 const servicesRouter = require("./routes/userapp/services");
 const bookingRouter = require("./routes/userapp/booking");
@@ -28,6 +32,14 @@ const allowedOrigins = [
   "https://www.ellieshairbeauty.com",
 ];
 
+app.set("trust proxy", 1);
+
+app.use(securityHeaders());
+app.use(securityLogger);
+app.use(botProtection);
+app.use(globalLimiter);
+app.use(requestSizeLimiter("2mb"));
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -38,17 +50,24 @@ app.use(
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 86400,
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+app.use(sanitizeInput());
+app.use(preventParameterPollution());
+app.use(validateReferer);
 
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+app.use("/uploads", express.static(path.join(__dirname, "../uploads"), {
+  dotfiles: "deny",
+  maxAge: "1d",
+  etag: true,
+  index: false,
+}));
 
 // User-facing routes
 app.use("/api/auth", authRouter);
@@ -73,12 +92,18 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal server error" });
+  if (err.message === "CORS not allowed") {
+    return res.status(403).json({ error: "Origin not allowed" });
+  }
+  console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err.message);
+  const status = err.status || 500;
+  res.status(status).json({
+    error: process.env.ENVIRONMENT === "production" ? "Internal server error" : err.message,
+  });
 });
 
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`Ellie's Hair & Beauty API running on port ${PORT}`);
+    console.log(`API running on port ${PORT} [${process.env.ENVIRONMENT || "development"}]`);
   });
 });

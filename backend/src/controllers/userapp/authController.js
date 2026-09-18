@@ -3,12 +3,23 @@ const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const nodemailer = require("nodemailer");
 const User = require("../../models/User");
+const { checkAccountLockout, recordFailedLogin, clearLoginAttempts, checkOtpLockout, recordFailedOtp, clearOtpAttempts } = require("../../middleware/security");
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
 const PASSWORD_RULES = "Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number and 1 special character";
 
 const pendingRegistrations = new Map();
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
+const MAX_PENDING = 1000;
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, data] of pendingRegistrations) {
+    if (now > data.expiresAt) {
+      pendingRegistrations.delete(key);
+    }
+  }
+}, 60 * 1000);
 
 function getMailTransporter() {
   return nodemailer.createTransport({
@@ -55,6 +66,10 @@ async function sendRegistrationOtp(req, res) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered" });
+    }
+
+    if (pendingRegistrations.size >= MAX_PENDING) {
+      return res.status(503).json({ error: "Service temporarily busy, please try again shortly" });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
@@ -118,9 +133,17 @@ async function register(req, res) {
       return res.status(400).json({ error: "OTP has expired. Please request a new one." });
     }
 
+    const otpLock = checkOtpLockout(email.toLowerCase());
+    if (otpLock.locked) {
+      return res.status(429).json({ error: "Too many failed OTP attempts. Please request a new OTP." });
+    }
+
     if (pending.otp !== otp) {
+      recordFailedOtp(email.toLowerCase());
       return res.status(400).json({ error: "Invalid OTP" });
     }
+
+    clearOtpAttempts(email.toLowerCase());
 
     const existingUser = await User.findOne({ email: pending.email });
     if (existingUser) {
@@ -155,15 +178,26 @@ async function login(req, res) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
+    const lockout = checkAccountLockout(email.toLowerCase());
+    if (lockout.locked) {
+      return res.status(429).json({
+        error: `Account temporarily locked due to too many failed attempts. Try again in ${lockout.remainingMin} minutes.`,
+      });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
+      recordFailedLogin(email.toLowerCase());
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      recordFailedLogin(email.toLowerCase());
       return res.status(401).json({ error: "Invalid email or password" });
     }
+
+    clearLoginAttempts(email.toLowerCase());
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -338,6 +372,11 @@ async function resetPassword(req, res) {
       return res.status(400).json({ error: PASSWORD_RULES });
     }
 
+    const resetOtpLock = checkOtpLockout("reset:" + email.toLowerCase());
+    if (resetOtpLock.locked) {
+      return res.status(429).json({ error: "Too many failed attempts. Please request a new OTP." });
+    }
+
     const user = await User.findOne({
       email,
       passwordResetOtp: otp,
@@ -345,8 +384,11 @@ async function resetPassword(req, res) {
     });
 
     if (!user) {
+      recordFailedOtp("reset:" + email.toLowerCase());
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
+
+    clearOtpAttempts("reset:" + email.toLowerCase());
 
     user.password = newPassword;
     user.passwordResetOtp = undefined;
