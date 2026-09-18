@@ -19,13 +19,13 @@ const navItems = [
   { href: "/admin/appointments", label: "Appointments", icon: Calendar },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/services", label: "Services", icon: Scissors },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/gallery", label: "Gallery", icon: Image },
-  { href: "/admin/contacts", label: "Messages", icon: MessageSquare },
   { href: "/admin/memberships", label: "Memberships", icon: Crown },
-  { href: "/admin/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/supercoins", label: "SuperCoins", icon: Star },
+  { href: "/admin/coupons", label: "Coupons", icon: Ticket },
+  { href: "/admin/contacts", label: "Messages", icon: MessageSquare },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
 ];
 
