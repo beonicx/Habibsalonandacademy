@@ -17,6 +17,7 @@ const methodLabels = {
   upi: "UPI",
   "bank-transfer": "Bank Transfer",
   wallet: "Wallet",
+  razorpay: "Razorpay",
   other: "Other",
 };
 
@@ -169,6 +170,7 @@ export default function PaymentsPage() {
           <option value="upi">UPI</option>
           <option value="bank-transfer">Bank Transfer</option>
           <option value="wallet">Wallet</option>
+          <option value="razorpay">Razorpay</option>
         </select>
         {(statusFilter || methodFilter) && (
           <button
@@ -223,7 +225,12 @@ export default function PaymentsPage() {
                         {pay.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-600 font-mono text-sm">{pay.transactionId || "—"}</td>
+                    <td className="px-5 py-3 text-gray-600 font-mono text-sm">
+                      {pay.transactionId || "—"}
+                      {pay.razorpayOrderId && (
+                        <p className="text-xs text-gray-400 mt-0.5">Order: {pay.razorpayOrderId}</p>
+                      )}
+                    </td>
                     <td className="px-5 py-3 text-right">
                       {pay.status === "completed" && (
                         <button
@@ -274,6 +281,7 @@ export default function PaymentsPage() {
                     <option value="upi">UPI</option>
                     <option value="bank-transfer">Bank Transfer</option>
                     <option value="wallet">Wallet</option>
+                    <option value="razorpay">Razorpay</option>
                   </select>
                 </div>
               </div>

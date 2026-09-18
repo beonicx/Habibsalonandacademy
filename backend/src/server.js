@@ -12,6 +12,7 @@ const contactRouter = require("./routes/userapp/contact");
 const supercoinsRouter = require("./routes/userapp/supercoins");
 const couponsRouter = require("./routes/userapp/coupons");
 const membershipRouter = require("./routes/userapp/membership");
+const paymentRouter = require("./routes/userapp/payment");
 
 const adminRouter = require("./routes/admin");
 
@@ -58,6 +59,7 @@ app.use("/api/contact", contactRouter);
 app.use("/api/supercoins", supercoinsRouter);
 app.use("/api/coupons", couponsRouter);
 app.use("/api/memberships", membershipRouter);
+app.use("/api/payments", paymentRouter);
 
 // Admin routes
 app.use("/api/admin", adminRouter);

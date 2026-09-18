@@ -170,6 +170,7 @@ export default function AppointmentsPage() {
                   <th className="px-5 py-3">Service</th>
                   <th className="px-5 py-3">Date</th>
                   <th className="px-5 py-3">Time</th>
+                  <th className="px-5 py-3">Payment</th>
                   <th className="px-5 py-3">Status</th>
                   <th className="px-5 py-3">Actions</th>
                 </tr>
@@ -177,7 +178,7 @@ export default function AppointmentsPage() {
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-10 text-center text-gray-500">
+                    <td colSpan={7} className="px-5 py-10 text-center text-gray-500">
                       No appointments found
                     </td>
                   </tr>
@@ -195,6 +196,16 @@ export default function AppointmentsPage() {
                         {new Date(a.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                       </td>
                       <td className="px-5 py-3 text-gray-800">{a.timeSlot}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${a.paymentMethod === "online" ? "bg-blue-50 text-blue-700" : "bg-amber-50 text-amber-700"}`}>
+                            {a.paymentMethod === "online" ? "Online" : "Pay on Visit"}
+                          </span>
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${a.paymentStatus === "paid" ? "bg-green-50 text-green-700" : a.paymentStatus === "refunded" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-600"}`}>
+                            {a.paymentStatus || "unpaid"}
+                          </span>
+                        </div>
+                      </td>
                       <td className="px-5 py-3">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-sm font-medium border ${statusColors[a.status] || statusColors.pending}`}>
                           {a.status}

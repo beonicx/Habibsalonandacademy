@@ -90,6 +90,19 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    paymentMethod: {
+      type: String,
+      enum: ["online", "pov"],
+      default: "pov",
+    },
+    razorpayOrderId: {
+      type: String,
+      default: "",
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: "",
+    },
     cancellationReason: String,
     reminderSent: {
       type: Boolean,

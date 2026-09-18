@@ -9,7 +9,7 @@ const COIN_VALUE = 0.5;
 
 const createBooking = async (req, res) => {
   try {
-    const { name, email, phone, service, date, time, notes, redeemSuperCoins, couponCode } = req.body;
+    const { name, email, phone, service, date, time, notes, redeemSuperCoins, couponCode, paymentMethod } = req.body;
 
     let superCoinsUsed = 0;
     let superCoinsDiscount = 0;
@@ -104,6 +104,8 @@ const createBooking = async (req, res) => {
       timeSlot: time,
       notes: notes || "",
       status: "pending",
+      paymentMethod: paymentMethod === "online" ? "online" : "pov",
+      paymentStatus: paymentMethod === "online" ? "unpaid" : "unpaid",
       couponCode: appliedCouponCode,
       couponDiscount,
       superCoinsUsed,

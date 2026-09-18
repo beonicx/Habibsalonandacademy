@@ -17,7 +17,7 @@ const paymentSchema = new mongoose.Schema(
     },
     method: {
       type: String,
-      enum: ["cash", "card", "upi", "bank-transfer", "wallet", "other"],
+      enum: ["cash", "card", "upi", "bank-transfer", "wallet", "razorpay", "other"],
       required: true,
     },
     status: {
@@ -32,6 +32,18 @@ const paymentSchema = new mongoose.Schema(
     refundAmount: {
       type: Number,
       default: 0,
+    },
+    razorpayOrderId: {
+      type: String,
+      default: "",
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: "",
+    },
+    razorpaySignature: {
+      type: String,
+      default: "",
     },
     refundReason: String,
     notes: {
