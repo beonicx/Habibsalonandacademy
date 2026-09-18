@@ -141,6 +141,13 @@ export const contacts = {
   delete: (id) => adminFetch(`/admin/contacts/${id}`, { method: "DELETE" }).then((r) => r.json()),
 };
 
+export const coupons = {
+  getAll: (params) => adminFetch(`/admin/coupons${qs(params)}`).then((r) => r.json()),
+  create: (data) => adminFetch("/admin/coupons", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),
+  update: (id, data) => adminFetch(`/admin/coupons/${id}`, { method: "PUT", body: JSON.stringify(data) }).then((r) => r.json()),
+  delete: (id) => adminFetch(`/admin/coupons/${id}`, { method: "DELETE" }).then((r) => r.json()),
+};
+
 export const notifications = {
   getAll: (params) => adminFetch(`/admin/notifications${qs(params)}`).then((r) => r.json()),
   create: (data) => adminFetch("/admin/notifications", { method: "POST", body: JSON.stringify(data) }).then((r) => r.json()),

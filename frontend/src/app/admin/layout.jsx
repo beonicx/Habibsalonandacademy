@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Calendar, Users, Scissors, CreditCard, Package,
-  Image, MessageSquare, Crown, Star, Bell, Menu, X, LogOut, ChevronRight,
+  Image, MessageSquare, Crown, Star, Bell, Ticket, Menu, X, LogOut, ChevronRight,
 } from "lucide-react";
 import { adminLogin } from "../../lib/adminApi";
 
@@ -24,6 +24,7 @@ const navItems = [
   { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/contacts", label: "Messages", icon: MessageSquare },
   { href: "/admin/memberships", label: "Memberships", icon: Crown },
+  { href: "/admin/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/supercoins", label: "SuperCoins", icon: Star },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
 ];
