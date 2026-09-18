@@ -123,25 +123,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-let server;
-
-connectDB().then(() => {
-  server = app.listen(PORT, () => {
-    logger.info(`API running on port ${PORT} [${process.env.ENVIRONMENT || "development"}]`);
-  });
+const server = app.listen(PORT, () => {
+  logger.info(`API running on port ${PORT} [${process.env.ENVIRONMENT || "development"}]`);
 });
+
+connectDB().catch(() => {});
 
 function gracefulShutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);
-  if (server) {
-    server.close(() => {
-      logger.info("HTTP server closed");
-      mongoose.connection.close(false).then(() => {
-        logger.info("MongoDB connection closed");
-        process.exit(0);
-      });
+  server.close(() => {
+    logger.info("HTTP server closed");
+    mongoose.connection.close(false).then(() => {
+      logger.info("MongoDB connection closed");
+      process.exit(0);
     });
-  }
+  });
   setTimeout(() => {
     logger.error("Forced shutdown — could not close connections in time");
     process.exit(1);

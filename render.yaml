@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: habib-salon-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ENVIRONMENT
+        value: production
