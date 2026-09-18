@@ -109,9 +109,9 @@ export default function CustomersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
+                <tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                   <th className="px-5 py-3">Name</th>
                   <th className="px-5 py-3">Email</th>
                   <th className="px-5 py-3">Phone</th>
@@ -143,7 +143,7 @@ export default function CustomersPage() {
                           <div>
                             <span className="font-medium text-gray-900">{c.name}</span>
                             {c.activeMembership && (
-                              <p className="text-[10px] text-amber-600 font-medium">{c.activeMembership.planName} Member</p>
+                              <p className="text-xs text-amber-600 font-medium">{c.activeMembership.planName} Member</p>
                             )}
                           </div>
                         </div>
@@ -166,7 +166,7 @@ export default function CustomersPage() {
 
         {pagination.pages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-600">
+            <span className="text-sm text-gray-600">
               Page {pagination.page} of {pagination.pages} ({pagination.total} total)
             </span>
             <div className="flex gap-2">

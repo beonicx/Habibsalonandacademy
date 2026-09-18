@@ -180,7 +180,7 @@ export default function CustomerDetailPage() {
                 <div key={s.label} className="bg-gray-50 rounded-lg p-4 text-center">
                   <Icon size={18} className="text-rose-gold mx-auto mb-2" />
                   <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                  <p className="text-xs text-gray-600">{s.label}</p>
+                  <p className="text-sm text-gray-600">{s.label}</p>
                 </div>
               );
             })}
@@ -194,9 +194,9 @@ export default function CustomerDetailPage() {
           <h2 className="text-base font-semibold text-gray-900">Booking History</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
+              <tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                 <th className="px-5 py-3">Service</th>
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Time</th>
@@ -216,7 +216,7 @@ export default function CustomerDetailPage() {
                     </td>
                     <td className="px-5 py-3 text-gray-700">{b.timeSlot}</td>
                     <td className="px-5 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[b.status] || "bg-gray-100 text-gray-700"}`}>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-sm font-medium ${statusColors[b.status] || "bg-gray-100 text-gray-700"}`}>
                         {b.status}
                       </span>
                     </td>
@@ -235,9 +235,9 @@ export default function CustomerDetailPage() {
           <h2 className="text-base font-semibold text-gray-900">Payment History</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
+              <tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Amount</th>
                 <th className="px-5 py-3">Method</th>
@@ -256,7 +256,7 @@ export default function CustomerDetailPage() {
                     <td className="px-5 py-3 text-gray-900 font-medium">₹{p.amount?.toLocaleString("en-IN")}</td>
                     <td className="px-5 py-3 text-gray-700 capitalize">{p.method}</td>
                     <td className="px-5 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-sm font-medium ${
                         p.status === "completed" ? "bg-green-50 text-green-700" : p.status === "refunded" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-700"
                       }`}>
                         {p.status}

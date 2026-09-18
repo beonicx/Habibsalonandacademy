@@ -162,15 +162,15 @@ export default function AdminGalleryPage() {
               </div>
               <div className="p-3">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">{img.title}</h3>
-                  <span className="text-[10px] uppercase font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{img.category}</span>
+                  <h3 className="text-base font-medium text-gray-900 truncate">{img.title}</h3>
+                  <span className="text-xs uppercase font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{img.category}</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <button onClick={() => toggleActive(img)}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${img.isActive ? "bg-green-500" : "bg-gray-300"}`}>
                     <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${img.isActive ? "translate-x-4" : "translate-x-1"}`} />
                   </button>
-                  <span className="text-xs text-gray-500">Order: {img.sortOrder || 0}</span>
+                  <span className="text-sm text-gray-500">Order: {img.sortOrder || 0}</span>
                 </div>
               </div>
             </div>

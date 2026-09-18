@@ -205,9 +205,9 @@ export default function ProductsPage() {
           <div className="text-center py-16 text-gray-600">No products found</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="text-left text-xs text-gray-600 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-left text-sm text-gray-600 uppercase tracking-wider border-b border-gray-100">
                   <th className="px-5 py-3 font-medium">Name</th>
                   <th className="px-5 py-3 font-medium">SKU</th>
                   <th className="px-5 py-3 font-medium">Category</th>
@@ -224,19 +224,19 @@ export default function ProductsPage() {
                     <tr key={prod._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
                       <td className="px-5 py-3">
                         <p className="font-medium text-gray-900">{prod.name}</p>
-                        {prod.brand && <p className="text-xs text-gray-500">{prod.brand}</p>}
+                        {prod.brand && <p className="text-sm text-gray-500">{prod.brand}</p>}
                       </td>
-                      <td className="px-5 py-3 text-gray-600 font-mono text-xs">{prod.sku || "—"}</td>
+                      <td className="px-5 py-3 text-gray-600 font-mono text-sm">{prod.sku || "—"}</td>
                       <td className="px-5 py-3 text-gray-800">{prod.category}</td>
                       <td className="px-5 py-3 text-gray-800">₹{prod.price}</td>
                       <td className="px-5 py-3 text-gray-800">{prod.stock}</td>
                       <td className="px-5 py-3">
                         {!prod.isActive ? (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
+                          <span className="inline-flex px-2 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">Inactive</span>
                         ) : isLow ? (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">Low Stock</span>
+                          <span className="inline-flex px-2 py-0.5 rounded-full text-sm font-medium bg-red-50 text-red-700">Low Stock</span>
                         ) : (
-                          <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">In Stock</span>
+                          <span className="inline-flex px-2 py-0.5 rounded-full text-sm font-medium bg-green-50 text-green-700">In Stock</span>
                         )}
                       </td>
                       <td className="px-5 py-3 text-right">

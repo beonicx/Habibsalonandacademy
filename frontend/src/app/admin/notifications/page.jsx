@@ -111,16 +111,16 @@ export default function AdminNotificationsPage() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="px-4 lg:px-6 py-3 text-xs font-medium text-gray-600 uppercase">Title</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden md:table-cell">User</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Type</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden sm:table-cell">Channel</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden sm:table-cell">Read</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Date</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase w-10"></th>
+                    <th className="px-4 lg:px-6 py-3 text-sm font-medium text-gray-600 uppercase">Title</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden md:table-cell">User</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Type</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden sm:table-cell">Channel</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden sm:table-cell">Read</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Date</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase w-10"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -128,11 +128,11 @@ export default function AdminNotificationsPage() {
                     <tr key={n._id} className="hover:bg-gray-50">
                       <td className="px-4 lg:px-6 py-3">
                         <p className="font-medium text-gray-900">{n.title}</p>
-                        <p className="text-xs text-gray-600 truncate max-w-[250px]">{n.message}</p>
+                        <p className="text-sm text-gray-600 truncate max-w-[250px]">{n.message}</p>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         {n.isBroadcast ? (
-                          <span className="text-xs text-purple-600 font-medium">Broadcast</span>
+                          <span className="text-sm text-purple-600 font-medium">Broadcast</span>
                         ) : n.user ? (
                           <span className="text-gray-800">{n.user.name || n.user.email}</span>
                         ) : (
@@ -140,7 +140,7 @@ export default function AdminNotificationsPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-[10px] uppercase font-medium px-2 py-0.5 rounded-full ${typeStyle[n.type] || typeStyle.system}`}>
+                        <span className={`text-xs uppercase font-medium px-2 py-0.5 rounded-full ${typeStyle[n.type] || typeStyle.system}`}>
                           {n.type}
                         </span>
                       </td>
@@ -148,7 +148,7 @@ export default function AdminNotificationsPage() {
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <span className={`inline-block w-2 h-2 rounded-full ${n.isRead ? "bg-green-400" : "bg-gray-300"}`} />
                       </td>
-                      <td className="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">
                         {new Date(n.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                       </td>
                       <td className="px-4 py-3">

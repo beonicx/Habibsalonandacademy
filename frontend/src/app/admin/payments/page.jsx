@@ -190,9 +190,9 @@ export default function PaymentsPage() {
           <div className="text-center py-16 text-gray-600">No payments found</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="text-left text-xs text-gray-600 uppercase tracking-wider border-b border-gray-100">
+                <tr className="text-left text-sm text-gray-600 uppercase tracking-wider border-b border-gray-100">
                   <th className="px-5 py-3 font-medium">Date</th>
                   <th className="px-5 py-3 font-medium">Customer</th>
                   <th className="px-5 py-3 font-medium">Amount (₹)</th>
@@ -210,20 +210,20 @@ export default function PaymentsPage() {
                       <p className="font-medium text-gray-900">
                         {pay.user?.name || pay.booking?.customerName || "—"}
                       </p>
-                      {pay.user?.email && <p className="text-xs text-gray-500">{pay.user.email}</p>}
+                      {pay.user?.email && <p className="text-sm text-gray-500">{pay.user.email}</p>}
                     </td>
                     <td className="px-5 py-3 font-medium text-gray-900">₹{pay.amount}</td>
                     <td className="px-5 py-3">
-                      <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                      <span className="inline-flex px-2 py-0.5 rounded text-sm font-medium bg-gray-100 text-gray-800">
                         {methodLabels[pay.method] || pay.method}
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[pay.status] || "bg-gray-100 text-gray-700"}`}>
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-sm font-medium ${statusColors[pay.status] || "bg-gray-100 text-gray-700"}`}>
                         {pay.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-600 font-mono text-xs">{pay.transactionId || "—"}</td>
+                    <td className="px-5 py-3 text-gray-600 font-mono text-sm">{pay.transactionId || "—"}</td>
                     <td className="px-5 py-3 text-right">
                       {pay.status === "completed" && (
                         <button

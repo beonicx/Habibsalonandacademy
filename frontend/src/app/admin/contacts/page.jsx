@@ -108,14 +108,14 @@ export default function AdminContactsPage() {
                   onClick={() => toggleExpand(msg._id)}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-gray-900">{msg.name}</span>
-                      <span className={`text-[10px] uppercase font-medium px-2 py-0.5 rounded-full ${statusStyle[msg.status] || statusStyle.new}`}>
+                      <span className="text-base font-medium text-gray-900">{msg.name}</span>
+                      <span className={`text-xs uppercase font-medium px-2 py-0.5 rounded-full ${statusStyle[msg.status] || statusStyle.new}`}>
                         {msg.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 truncate">{msg.subject}</p>
+                    <p className="text-base text-gray-700 truncate">{msg.subject}</p>
                   </div>
-                  <span className="text-xs text-gray-500 whitespace-nowrap hidden sm:block">
+                  <span className="text-sm text-gray-500 whitespace-nowrap hidden sm:block">
                     {new Date(msg.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
                   <div className="flex gap-1">
@@ -134,7 +134,7 @@ export default function AdminContactsPage() {
 
                 {expanded === msg._id && (
                   <div className="px-4 lg:px-6 pb-4 bg-gray-50 border-t border-gray-100">
-                    <div className="py-4 space-y-3 text-sm">
+                    <div className="py-4 space-y-3 text-base">
                       <div className="flex flex-wrap gap-x-6 gap-y-1 text-gray-600">
                         <span>Email: <span className="text-gray-800">{msg.email}</span></span>
                         {msg.phone && <span>Phone: <span className="text-gray-800">{msg.phone}</span></span>}

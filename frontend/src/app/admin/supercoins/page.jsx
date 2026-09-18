@@ -175,15 +175,15 @@ export default function AdminSuperCoinsPage() {
             <div className="p-8 text-center"><p className="text-gray-600 text-sm">No SuperCoins data yet</p></div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="px-4 lg:px-6 py-3 text-xs font-medium text-gray-600 uppercase w-12">#</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Name</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right">SuperCoins</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Total Spent</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Visits</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-center w-16">Edit</th>
+                    <th className="px-4 lg:px-6 py-3 text-sm font-medium text-gray-600 uppercase w-12">#</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Name</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-right">SuperCoins</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Total Spent</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Visits</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-center w-16">Edit</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -201,7 +201,7 @@ export default function AdminSuperCoinsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-600">{user.email}</p>
+                        <p className="text-sm text-gray-600">{user.email}</p>
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-[#C9956B]">{user.superCoins}</td>
                       <td className="px-4 py-3 text-right text-gray-700 hidden sm:table-cell">₹{user.totalSpent || 0}</td>
@@ -232,15 +232,15 @@ export default function AdminSuperCoinsPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-base">
                   <thead className="bg-gray-50 text-left">
                     <tr>
-                      <th className="px-4 lg:px-6 py-3 text-xs font-medium text-gray-600 uppercase">User</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Type</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right">SuperCoins</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden md:table-cell">Description</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Balance</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Date</th>
+                      <th className="px-4 lg:px-6 py-3 text-sm font-medium text-gray-600 uppercase">User</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Type</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-right">SuperCoins</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden md:table-cell">Description</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase text-right hidden sm:table-cell">Balance</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -248,10 +248,10 @@ export default function AdminSuperCoinsPage() {
                       <tr key={t._id} className="hover:bg-gray-50">
                         <td className="px-4 lg:px-6 py-3">
                           <p className="font-medium text-gray-900">{t.user?.name || "—"}</p>
-                          <p className="text-xs text-gray-600">{t.user?.email || ""}</p>
+                          <p className="text-sm text-gray-600">{t.user?.email || ""}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-[10px] uppercase font-medium px-2 py-0.5 rounded-full ${
+                          <span className={`text-xs uppercase font-medium px-2 py-0.5 rounded-full ${
                             t.type === "earned" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                           }`}>
                             {t.type}
@@ -262,7 +262,7 @@ export default function AdminSuperCoinsPage() {
                         </td>
                         <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate hidden md:table-cell">{t.description || "—"}</td>
                         <td className="px-4 py-3 text-right text-gray-600 hidden sm:table-cell">{t.balanceAfter}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">
+                        <td className="px-4 py-3 text-gray-600 text-sm">
                           {new Date(t.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                         </td>
                       </tr>

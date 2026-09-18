@@ -229,15 +229,15 @@ export default function AdminMembershipsPage() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-base">
                   <thead className="bg-gray-50 text-left">
                     <tr>
-                      <th className="px-4 lg:px-6 py-3 text-xs font-medium text-gray-600 uppercase">User</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Plan</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden sm:table-cell">Start</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden sm:table-cell">End</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Status</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Actions</th>
+                      <th className="px-4 lg:px-6 py-3 text-sm font-medium text-gray-600 uppercase">User</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Plan</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden sm:table-cell">Start</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden sm:table-cell">End</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Status</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -245,13 +245,13 @@ export default function AdminMembershipsPage() {
                       <tr key={m._id} className="hover:bg-gray-50">
                         <td className="px-4 lg:px-6 py-3">
                           <p className="font-medium text-gray-900">{m.user?.name || "—"}</p>
-                          <p className="text-xs text-gray-600">{m.user?.email || ""}</p>
+                          <p className="text-sm text-gray-600">{m.user?.email || ""}</p>
                         </td>
                         <td className="px-4 py-3 text-gray-800">{m.plan?.name || "—"}</td>
                         <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{new Date(m.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
                         <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{new Date(m.endDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-[10px] uppercase font-medium px-2 py-0.5 rounded-full ${statusStyle[m.status] || "bg-gray-100 text-gray-700"}`}>
+                          <span className={`text-xs uppercase font-medium px-2 py-0.5 rounded-full ${statusStyle[m.status] || "bg-gray-100 text-gray-700"}`}>
                             {m.status}
                           </span>
                         </td>

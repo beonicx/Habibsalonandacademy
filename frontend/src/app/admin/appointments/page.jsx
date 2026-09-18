@@ -163,9 +163,9 @@ export default function AppointmentsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
+                <tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider bg-gray-50">
                   <th className="px-5 py-3">Customer</th>
                   <th className="px-5 py-3">Service</th>
                   <th className="px-5 py-3">Date</th>
@@ -186,7 +186,7 @@ export default function AppointmentsPage() {
                     <tr key={a._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                       <td className="px-5 py-3">
                         <p className="font-medium text-gray-900">{a.customerName}</p>
-                        <p className="text-xs text-gray-500">{a.customerPhone}</p>
+                        <p className="text-sm text-gray-500">{a.customerPhone}</p>
                       </td>
                       <td className="px-5 py-3 text-gray-800">
                         {a.services?.map((s) => s.name).join(", ") || "—"}
@@ -196,7 +196,7 @@ export default function AppointmentsPage() {
                       </td>
                       <td className="px-5 py-3 text-gray-800">{a.timeSlot}</td>
                       <td className="px-5 py-3">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[a.status] || statusColors.pending}`}>
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-sm font-medium border ${statusColors[a.status] || statusColors.pending}`}>
                           {a.status}
                         </span>
                       </td>
@@ -204,7 +204,7 @@ export default function AppointmentsPage() {
                         <select
                           value={a.status}
                           onChange={(e) => handleStatusChange(a._id, e.target.value)}
-                          className="px-2 py-1 border border-gray-200 rounded text-xs focus:outline-none focus:border-rose-gold bg-white"
+                          className="px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-rose-gold bg-white"
                         >
                           {statuses.map((s) => (
                             <option key={s} value={s}>{s.replace("-", " ")}</option>
@@ -222,7 +222,7 @@ export default function AppointmentsPage() {
         {/* Pagination */}
         {pagination.pages > 1 && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-            <span className="text-xs text-gray-600">
+            <span className="text-sm text-gray-600">
               Page {pagination.page} of {pagination.pages} ({pagination.total} total)
             </span>
             <div className="flex gap-2">

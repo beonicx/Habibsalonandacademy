@@ -106,7 +106,7 @@ export default function AdminDashboard() {
               className="bg-white rounded-xl border border-gray-200 shadow-sm p-5"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
+                <span className="text-sm font-medium text-gray-600 uppercase tracking-wider">
                   {card.label}
                 </span>
                 <div
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
               </div>
               <p className="text-2xl font-bold text-gray-900">{card.value}</p>
               {card.sub && (
-                <p className="text-xs text-gray-500 mt-1">{card.sub}</p>
+                <p className="text-sm text-gray-500 mt-1">{card.sub}</p>
               )}
             </div>
           );
@@ -132,9 +132,9 @@ export default function AdminDashboard() {
           </h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+              <tr className="text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
                 <th className="px-5 py-3">Customer</th>
                 <th className="px-5 py-3">Service</th>
                 <th className="px-5 py-3">Date</th>
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                       <p className="font-medium text-gray-900">
                         {b.customerName}
                       </p>
-                      <p className="text-xs text-gray-500">{b.customerEmail}</p>
+                      <p className="text-sm text-gray-500">{b.customerEmail}</p>
                     </td>
                     <td className="px-5 py-3 text-gray-800">
                       {b.services?.map((s) => s.name).join(", ") || "—"}
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
                     <td className="px-5 py-3 text-gray-800">{b.timeSlot}</td>
                     <td className="px-5 py-3">
                       <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                        className={`inline-block px-2.5 py-1 rounded-full text-sm font-medium border ${
                           statusColors[b.status] || statusColors.pending
                         }`}
                       >

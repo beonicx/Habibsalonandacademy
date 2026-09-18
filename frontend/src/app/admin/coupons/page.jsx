@@ -236,15 +236,15 @@ export default function AdminCouponsPage() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="px-4 lg:px-6 py-3 text-xs font-medium text-gray-600 uppercase">Code</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Discount</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden md:table-cell">Usage</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase hidden sm:table-cell">Valid Till</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Status</th>
-                    <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase">Actions</th>
+                    <th className="px-4 lg:px-6 py-3 text-sm font-medium text-gray-600 uppercase">Code</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Discount</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden md:table-cell">Usage</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase hidden sm:table-cell">Valid Till</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Status</th>
+                    <th className="px-4 py-3 text-sm font-medium text-gray-600 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -270,7 +270,7 @@ export default function AdminCouponsPage() {
                             </button>
                           </div>
                           {coupon.description && (
-                            <p className="text-xs text-gray-500 mt-0.5 max-w-[200px] truncate">
+                            <p className="text-sm text-gray-500 mt-0.5 max-w-[200px] truncate">
                               {coupon.description}
                             </p>
                           )}
@@ -280,7 +280,7 @@ export default function AdminCouponsPage() {
                             {discountLabel(coupon)}
                           </span>
                           {coupon.minOrderAmount > 0 && (
-                            <p className="text-xs text-gray-500">Min ₹{coupon.minOrderAmount}</p>
+                            <p className="text-sm text-gray-500">Min ₹{coupon.minOrderAmount}</p>
                           )}
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell">
@@ -288,7 +288,7 @@ export default function AdminCouponsPage() {
                             {coupon.usedCount}
                             {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""}
                           </span>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500">
                             {coupon.perUserLimit === 1 ? "1 per user" : `${coupon.perUserLimit} per user`}
                           </p>
                         </td>
@@ -296,7 +296,7 @@ export default function AdminCouponsPage() {
                           {formatDate(coupon.validTill)}
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-[10px] uppercase font-medium px-2 py-0.5 rounded-full ${badge.style}`}>
+                          <span className={`text-xs uppercase font-medium px-2 py-0.5 rounded-full ${badge.style}`}>
                             {badge.text}
                           </span>
                         </td>

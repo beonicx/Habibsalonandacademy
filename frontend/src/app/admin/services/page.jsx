@@ -176,7 +176,7 @@ export default function ServicesPage() {
                 <div>
                   <h2 className="font-semibold text-gray-900">{cat.category}</h2>
                   {cat.description && (
-                    <p className="text-xs text-gray-600 mt-0.5">{cat.description}</p>
+                    <p className="text-sm text-gray-600 mt-0.5">{cat.description}</p>
                   )}
                 </div>
                 <button
@@ -187,9 +187,9 @@ export default function ServicesPage() {
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-base">
                   <thead>
-                    <tr className="text-left text-xs text-gray-600 uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-left text-sm text-gray-600 uppercase tracking-wider border-b border-gray-100">
                       <th className="px-5 py-3 font-medium">Name</th>
                       <th className="px-5 py-3 font-medium">Price (₹)</th>
                       <th className="px-5 py-3 font-medium">Duration</th>
@@ -203,7 +203,7 @@ export default function ServicesPage() {
                         <td className="px-5 py-3">
                           <p className="font-medium text-gray-900">{svc.name}</p>
                           {svc.description && (
-                            <p className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{svc.description}</p>
+                            <p className="text-sm text-gray-500 mt-0.5 truncate max-w-xs">{svc.description}</p>
                           )}
                         </td>
                         <td className="px-5 py-3 text-gray-800">₹{svc.price}</td>
