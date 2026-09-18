@@ -445,7 +445,7 @@ export default function DashboardPage() {
                   <span className="font-sans text-sm opacity-80">coins</span>
                 </div>
                 <p className="font-sans text-xs mt-2 opacity-70">
-                  Worth ₹{(coinBalance * 0.5).toFixed(0)} in discounts
+                  Worth ₹{(coinBalance * 1).toFixed(0)} in discounts
                 </p>
               </div>
               <a

@@ -1,7 +1,7 @@
 const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 const User = require("../../models/User");
 
-const COIN_VALUE = 0.5;
+const COIN_VALUE = 1;
 
 async function getMyCoins(req, res) {
   try {

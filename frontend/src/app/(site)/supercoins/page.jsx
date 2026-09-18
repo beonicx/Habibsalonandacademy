@@ -36,7 +36,7 @@ export default function SuperCoinsPage() {
   }
 
   const balance = coinData?.balance ?? 0;
-  const coinValue = coinData?.coinValue ?? 0.5;
+  const coinValue = coinData?.coinValue ?? 1;
   const totalEarned = coinData?.totalEarned ?? 0;
   const totalRedeemed = coinData?.totalRedeemed ?? 0;
   const history = coinData?.history ?? [];

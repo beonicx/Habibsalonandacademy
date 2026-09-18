@@ -67,7 +67,7 @@ function BookingContent() {
   const [error, setError] = useState("");
 
   const [coinBalance, setCoinBalance] = useState(0);
-  const [coinValue, setCoinValue] = useState(0.5);
+  const [coinValue, setCoinValue] = useState(1);
   const [useCoins, setUseCoins] = useState(false);
   const [coinsToRedeem, setCoinsToRedeem] = useState(0);
 
@@ -124,7 +124,7 @@ function BookingContent() {
       .then((data) => {
         if (data.success) {
           setCoinBalance(data.data.balance);
-          setCoinValue(data.data.coinValue || 0.5);
+          setCoinValue(data.data.coinValue || 1);
         }
       })
       .catch(() => {});

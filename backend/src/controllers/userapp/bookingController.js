@@ -5,7 +5,7 @@ const SuperCoinTransaction = require("../../models/SuperCoinTransaction");
 const Notification = require("../../models/Notification");
 const { sendBookingNotification } = require("../../services/emailService");
 
-const COIN_VALUE = 0.5;
+const COIN_VALUE = 1;
 
 const createBooking = async (req, res) => {
   try {
