@@ -146,9 +146,17 @@ const sendBookingNotification = async (booking) => {
       `,
     });
 
-    const [salonInfo, clientInfo] = await Promise.all([salonMail, clientMail]);
-    console.log("📧 Salon notification sent", salonInfo.messageId);
-    console.log("📧 Client confirmation sent", clientInfo.messageId);
+    const results = await Promise.allSettled([salonMail, clientMail]);
+    if (results[0].status === "fulfilled") {
+      console.log("📧 Salon notification sent", results[0].value.messageId);
+    } else {
+      console.error("📧 Salon notification FAILED:", results[0].reason?.message || results[0].reason);
+    }
+    if (results[1].status === "fulfilled") {
+      console.log("📧 Client confirmation sent", results[1].value.messageId);
+    } else {
+      console.error("📧 Client confirmation FAILED:", results[1].reason?.message || results[1].reason);
+    }
   } catch (error) {
     console.error("Email error:", error);
   }
