@@ -3,7 +3,7 @@ const nextConfig = {
   images: {
     domains: ["images.unsplash.com"],
   },
-  poweredBy: false,
+  poweredByHeader: false,
   async headers() {
     return [
       {
