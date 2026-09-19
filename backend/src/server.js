@@ -94,6 +94,10 @@ app.use("/api/payments", paymentRouter);
 
 app.use("/api/admin", adminRouter);
 
+app.get("/", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.get("/api/health", (req, res) => {
   const dbState = mongoose.connection.readyState;
   const dbStatus = { 0: "disconnected", 1: "connected", 2: "connecting", 3: "disconnecting" };
