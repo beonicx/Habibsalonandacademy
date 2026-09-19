@@ -174,7 +174,7 @@ export default function CustomerDetailPage() {
                 <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="text-xl font-bold text-gray-900 px-2 py-1 border border-gray-200 rounded-lg focus:outline-none focus:border-rose-gold" />
               ) : (
-                <h2 className="text-xl font-bold text-gray-900">{customer.name}</h2>
+                <h2 className="text-xl font-bold text-black">{customer.name}</h2>
               )}
               <p className="text-base text-gray-600">
                 Member since {new Date(customer.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
