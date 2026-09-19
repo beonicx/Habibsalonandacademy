@@ -67,14 +67,19 @@ function securityLogger(req, res, next) {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (res.statusCode >= 400) {
-      logger.warn({
+      const meta = {
         ip: req.ip,
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
         duration,
         ua: (req.headers["user-agent"] || "").substring(0, 100),
-      }, "Security event");
+      };
+      if (res.statusCode === 401 || res.statusCode === 403) {
+        logger.info(meta, "Auth failure");
+      } else {
+        logger.warn(meta, "Security event");
+      }
     }
   });
 
