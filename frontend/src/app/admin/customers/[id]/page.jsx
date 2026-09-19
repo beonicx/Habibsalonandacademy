@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, User, Mail, Phone, MapPin, Edit3, Check, X, Loader,
   Calendar, CreditCard, Star, Crown, Clock, IndianRupee, TrendingUp,
-  TrendingDown, Gift, Award, Shield,
+  TrendingDown, Gift, Shield, Plus,
 } from "lucide-react";
-import { customers } from "../../../../lib/adminApi";
+import { customers, appointments, payments as paymentsApi, services as servicesApi } from "../../../../lib/adminApi";
 
 const statusColors = {
   pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -39,9 +39,24 @@ const coinTypeColors = {
   adjusted: "text-blue-600",
 };
 
+const timeSlots = [
+  "9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+  "12:00 PM","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM",
+  "3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM",
+  "6:00 PM","6:30 PM","7:00 PM",
+];
+
+const paymentMethods = [
+  { value: "cash", label: "Cash" },
+  { value: "card", label: "Card" },
+  { value: "upi", label: "UPI" },
+  { value: "bank-transfer", label: "Bank Transfer" },
+  { value: "razorpay", label: "Razorpay" },
+  { value: "other", label: "Other" },
+];
+
 export default function CustomerDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id;
 
   const [customer, setCustomer] = useState(null);
@@ -56,32 +71,60 @@ export default function CustomerDetailPage() {
   const [editForm, setEditForm] = useState({ name: "", phone: "", address: "" });
   const [activeTab, setActiveTab] = useState("bookings");
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await customers.getById(id);
-        if (res.success) {
-          setCustomer(res.data.customer);
-          setBookings(res.data.bookings || []);
-          setPayments(res.data.payments || []);
-          setSuperCoinHistory(res.data.superCoinHistory || []);
-          setActiveMembership(res.data.activeMembership || null);
-          setEditForm({
-            name: res.data.customer.name || "",
-            phone: res.data.customer.phone || "",
-            address: res.data.customer.address || "",
-          });
-        } else {
-          setError(res.error || "Customer not found");
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const [serviceList, setServiceList] = useState([]);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [modalSaving, setModalSaving] = useState(false);
+  const [modalError, setModalError] = useState("");
+
+  const [bookingForm, setBookingForm] = useState({
+    services: "", date: "", timeSlot: "", stylist: "", notes: "",
+  });
+  const [paymentForm, setPaymentForm] = useState({
+    amount: "", method: "cash", bookingId: "", transactionId: "", notes: "",
+  });
+
+  async function loadCustomer() {
+    try {
+      const res = await customers.getById(id);
+      if (res.success) {
+        setCustomer(res.data.customer);
+        setBookings(res.data.bookings || []);
+        setPayments(res.data.payments || []);
+        setSuperCoinHistory(res.data.superCoinHistory || []);
+        setActiveMembership(res.data.activeMembership || null);
+        setEditForm({
+          name: res.data.customer.name || "",
+          phone: res.data.customer.phone || "",
+          address: res.data.customer.address || "",
+        });
+      } else {
+        setError(res.error || "Customer not found");
       }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    load();
+  }
+
+  useEffect(() => {
+    loadCustomer();
   }, [id]);
+
+  useEffect(() => {
+    servicesApi.getAll().then((res) => {
+      if (res.success && res.data) {
+        const items = [];
+        res.data.forEach((cat) => {
+          (cat.items || []).forEach((item) => {
+            items.push({ name: item.name, price: item.price || 0, duration: item.duration || 0 });
+          });
+        });
+        setServiceList(items);
+      }
+    }).catch(() => {});
+  }, []);
 
   async function handleSave() {
     setSaving(true);
@@ -95,6 +138,80 @@ export default function CustomerDetailPage() {
       // keep editing open
     } finally {
       setSaving(false);
+    }
+  }
+
+  function openBookingModal() {
+    setBookingForm({ services: "", date: "", timeSlot: "", stylist: "", notes: "" });
+    setModalError("");
+    setShowBookingModal(true);
+  }
+
+  function openPaymentModal() {
+    setPaymentForm({ amount: "", method: "cash", bookingId: "", transactionId: "", notes: "" });
+    setModalError("");
+    setShowPaymentModal(true);
+  }
+
+  async function handleCreateBooking(e) {
+    e.preventDefault();
+    setModalSaving(true);
+    setModalError("");
+    try {
+      const svc = serviceList.find((s) => s.name === bookingForm.services);
+      const payload = {
+        userId: customer._id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        services: svc
+          ? [{ name: svc.name, price: svc.price, duration: svc.duration }]
+          : [{ name: bookingForm.services }],
+        date: bookingForm.date,
+        timeSlot: bookingForm.timeSlot,
+        stylist: bookingForm.stylist || "Any available",
+        notes: bookingForm.notes,
+      };
+      const res = await appointments.create(payload);
+      if (res.success) {
+        setShowBookingModal(false);
+        await loadCustomer();
+        setActiveTab("bookings");
+      } else {
+        setModalError(res.error || "Failed to create booking");
+      }
+    } catch (err) {
+      setModalError(err.message || "Failed to create booking");
+    } finally {
+      setModalSaving(false);
+    }
+  }
+
+  async function handleCreatePayment(e) {
+    e.preventDefault();
+    setModalSaving(true);
+    setModalError("");
+    try {
+      const payload = {
+        userId: customer._id,
+        amount: Number(paymentForm.amount),
+        method: paymentForm.method,
+        bookingId: paymentForm.bookingId || undefined,
+        transactionId: paymentForm.transactionId || undefined,
+        notes: paymentForm.notes || undefined,
+      };
+      const res = await paymentsApi.create(payload);
+      if (res.success) {
+        setShowPaymentModal(false);
+        await loadCustomer();
+        setActiveTab("payments");
+      } else {
+        setModalError(res.error || "Failed to record payment");
+      }
+    } catch (err) {
+      setModalError(err.message || "Failed to record payment");
+    } finally {
+      setModalSaving(false);
     }
   }
 
@@ -147,20 +264,30 @@ export default function CustomerDetailPage() {
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h1 className="text-lg font-semibold text-gray-900">Customer Profile</h1>
-          {!editing ? (
-            <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 text-sm text-rose-gold hover:opacity-80">
-              <Edit3 size={14} /> Edit
+          <div className="flex items-center gap-2">
+            <button onClick={openBookingModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-gold text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+              <Plus size={14} /> Booking
             </button>
-          ) : (
-            <div className="flex gap-2">
-              <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
-                <X size={14} /> Cancel
+            <button onClick={openPaymentModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+              <IndianRupee size={14} /> Payment
+            </button>
+            {!editing ? (
+              <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 text-sm text-rose-gold hover:opacity-80 ml-1">
+                <Edit3 size={14} /> Edit
               </button>
-              <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 text-sm text-rose-gold hover:opacity-80 disabled:opacity-50">
-                <Check size={14} /> {saving ? "Saving..." : "Save"}
-              </button>
-            </div>
-          )}
+            ) : (
+              <>
+                <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
+                  <X size={14} /> Cancel
+                </button>
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 text-sm text-rose-gold hover:opacity-80 disabled:opacity-50">
+                  <Check size={14} /> {saving ? "Saving..." : "Save"}
+                </button>
+              </>
+            )}
+          </div>
         </div>
         <div className="p-6">
           <div className="flex items-start gap-4 mb-6">
@@ -559,6 +686,149 @@ export default function CustomerDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Create Booking Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowBookingModal(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Create Booking for {customer.name}</h2>
+              <button onClick={() => setShowBookingModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateBooking} className="p-6 space-y-4">
+              {modalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2.5">{modalError}</div>
+              )}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Service *</label>
+                <select required value={bookingForm.services} onChange={(e) => setBookingForm({ ...bookingForm, services: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
+                  <option value="">Select a service</option>
+                  {serviceList.map((s) => (
+                    <option key={s.name} value={s.name}>{s.name}{s.price ? ` — ₹${s.price}` : ""}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Date *</label>
+                  <input required type="date" min={new Date().toISOString().split("T")[0]}
+                    value={bookingForm.date} onChange={(e) => setBookingForm({ ...bookingForm, date: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Time Slot *</label>
+                  <select required value={bookingForm.timeSlot} onChange={(e) => setBookingForm({ ...bookingForm, timeSlot: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
+                    <option value="">Select time</option>
+                    {timeSlots.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Stylist</label>
+                <input value={bookingForm.stylist} onChange={(e) => setBookingForm({ ...bookingForm, stylist: e.target.value })}
+                  placeholder="Any available"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Notes</label>
+                <textarea value={bookingForm.notes} onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
+                  rows={2} placeholder="Any special notes..."
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold resize-none" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setShowBookingModal(false)}
+                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={modalSaving}
+                  className="px-4 py-2.5 bg-rose-gold text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {modalSaving ? "Creating..." : "Create Booking"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Record Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowPaymentModal(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">Record Payment for {customer.name}</h2>
+              <button onClick={() => setShowPaymentModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCreatePayment} className="p-6 space-y-4">
+              {modalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2.5">{modalError}</div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Amount (₹) *</label>
+                  <input required type="number" min="1" step="1"
+                    value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Method *</label>
+                  <select required value={paymentForm.method} onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
+                    {paymentMethods.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Link to Booking</label>
+                <select value={paymentForm.bookingId} onChange={(e) => setPaymentForm({ ...paymentForm, bookingId: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold bg-white">
+                  <option value="">None (standalone payment)</option>
+                  {bookings.filter((b) => b.paymentStatus !== "paid" && b.status !== "cancelled").map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.services?.map((s) => s.name).join(", ")} — {new Date(b.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} {b.timeSlot}
+                      {b.finalAmount ? ` (₹${b.finalAmount})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Transaction ID</label>
+                <input value={paymentForm.transactionId} onChange={(e) => setPaymentForm({ ...paymentForm, transactionId: e.target.value })}
+                  placeholder="Optional reference number"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">Notes</label>
+                <textarea value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                  rows={2} placeholder="Optional notes..."
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-rose-gold resize-none" />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setShowPaymentModal(false)}
+                  className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={modalSaving}
+                  className="px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {modalSaving ? "Saving..." : "Record Payment"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -96,8 +96,8 @@ async function createAppointment(req, res) {
       notes,
     } = req.body;
 
-    if (!customerName || !customerEmail || !customerPhone || !date || !timeSlot) {
-      return res.status(400).json({ error: "Customer details, date and time are required" });
+    if (!customerName || !customerEmail || !date || !timeSlot) {
+      return res.status(400).json({ error: "Customer name, email, date and time are required" });
     }
 
     let totalAmount = 0;
@@ -113,7 +113,7 @@ async function createAppointment(req, res) {
       user: userId || undefined,
       customerName,
       customerEmail,
-      customerPhone,
+      customerPhone: customerPhone || "N/A",
       services,
       stylist,
       date,
