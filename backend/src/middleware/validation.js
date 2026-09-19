@@ -11,7 +11,8 @@ const handleValidationErrors = (req, res, next) => {
 const validateBooking = [
   body("name").trim().notEmpty().withMessage("Name is required"),
   body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
-  body("phone").trim().notEmpty().withMessage("Phone number is required"),
+  body("phone").trim().notEmpty().withMessage("Phone number is required")
+    .matches(/^\d{10}$/).withMessage("Phone number must be exactly 10 digits"),
   body("service").trim().notEmpty().withMessage("Service is required"),
   body("date").isISO8601().withMessage("Valid date is required"),
   body("time").trim().notEmpty().withMessage("Time is required"),

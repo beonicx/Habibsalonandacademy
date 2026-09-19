@@ -7,10 +7,67 @@ const Notification = require("../../models/Notification");
 const { sendBookingNotification } = require("../../services/emailService");
 
 const COIN_VALUE = 1;
+const MAX_BOOKINGS_PER_SLOT = 3;
+
+const getBookedSlots = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ success: false, error: "Date is required" });
+    }
+
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const bookings = await Booking.aggregate([
+      {
+        $match: {
+          date: { $gte: dayStart, $lte: dayEnd },
+          status: { $nin: ["cancelled", "no-show"] },
+        },
+      },
+      {
+        $group: {
+          _id: "$timeSlot",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const bookedSlots = bookings
+      .filter((b) => b.count >= MAX_BOOKINGS_PER_SLOT)
+      .map((b) => b._id);
+
+    res.json({ success: true, data: { bookedSlots } });
+  } catch (err) {
+    console.error("Get booked slots error:", err);
+    res.status(500).json({ success: false, error: "Failed to fetch slot availability" });
+  }
+};
 
 const createBooking = async (req, res) => {
   try {
     const { name, email, phone, service, date, time, notes, redeemSuperCoins, couponCode, paymentMethod } = req.body;
+
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const slotCount = await Booking.countDocuments({
+      date: { $gte: dayStart, $lte: dayEnd },
+      timeSlot: time,
+      status: { $nin: ["cancelled", "no-show"] },
+    });
+
+    if (slotCount >= MAX_BOOKINGS_PER_SLOT) {
+      return res.status(409).json({
+        success: false,
+        error: "This time slot is fully booked. Please choose a different time.",
+      });
+    }
 
     let superCoinsUsed = 0;
     let superCoinsDiscount = 0;
@@ -200,4 +257,5 @@ module.exports = {
   getAllBookings,
   getBookingById,
   updateBookingStatus,
+  getBookedSlots,
 };

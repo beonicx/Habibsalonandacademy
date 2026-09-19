@@ -79,6 +79,9 @@ function BookingContent() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
 
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
   const [paymentMethod, setPaymentMethod] = useState("pov");
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
@@ -133,8 +136,35 @@ function BookingContent() {
       .catch(() => {});
   }, [user, authFetch]);
 
+  useEffect(() => {
+    if (!form.date) {
+      setBookedSlots([]);
+      return;
+    }
+    setSlotsLoading(true);
+    fetch(`${API_BASE}/bookings/slots?date=${form.date}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setBookedSlots(data.data.bookedSlots);
+      })
+      .catch(() => {})
+      .finally(() => setSlotsLoading(false));
+  }, [form.date]);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setForm({ ...form, phone: digits });
+      setError("");
+      return;
+    }
+    if (name === "date") {
+      setForm({ ...form, date: value, time: "" });
+      setError("");
+      return;
+    }
+    setForm({ ...form, [name]: value });
     setError("");
   };
 
@@ -306,6 +336,14 @@ function BookingContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.phone.length !== 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    if (bookedSlots.includes(form.time)) {
+      setError("This time slot is no longer available. Please choose a different time.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -484,15 +522,24 @@ function BookingContent() {
                 <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-2">
                   Phone Number *
                 </label>
-                <input
-                  name="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={handleChange}
-                  required
-                  placeholder="+91 7700 000000"
-                  className="w-full border border-champagne px-4 py-3 font-body text-espresso focus:outline-none focus:border-rose-gold transition-colors duration-300 bg-cream"
-                />
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-body text-mocha/60 select-none">+91</span>
+                  <input
+                    name="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    value={form.phone}
+                    onChange={handleChange}
+                    required
+                    maxLength={10}
+                    pattern="\d{10}"
+                    placeholder="9876543210"
+                    className="w-full border border-champagne pl-12 pr-4 py-3 font-body text-espresso focus:outline-none focus:border-rose-gold transition-colors duration-300 bg-cream"
+                  />
+                </div>
+                {form.phone && form.phone.length < 10 && (
+                  <p className="font-sans text-xs text-mocha/60 mt-1">{form.phone.length}/10 digits</p>
+                )}
               </div>
 
               <div>
@@ -533,18 +580,25 @@ function BookingContent() {
               <div>
                 <label className="block font-sans text-xs tracking-widest uppercase text-mocha mb-2">
                   Preferred Time *
+                  {slotsLoading && <span className="ml-2 text-rose-gold font-normal normal-case tracking-normal">checking availability...</span>}
                 </label>
                 <select
                   name="time"
                   value={form.time}
                   onChange={handleChange}
                   required
-                  className="w-full border border-champagne px-4 py-3 font-body text-espresso focus:outline-none focus:border-rose-gold transition-colors duration-300 bg-cream"
+                  disabled={!form.date}
+                  className="w-full border border-champagne px-4 py-3 font-body text-espresso focus:outline-none focus:border-rose-gold transition-colors duration-300 bg-cream disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select a time</option>
-                  {timeSlots.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
+                  <option value="">{form.date ? "Select a time" : "Select a date first"}</option>
+                  {form.date && timeSlots.map((t) => {
+                    const isBooked = bookedSlots.includes(t);
+                    return (
+                      <option key={t} value={t} disabled={isBooked}>
+                        {t}{isBooked ? " — Fully Booked" : ""}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
