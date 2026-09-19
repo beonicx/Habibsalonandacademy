@@ -39,10 +39,13 @@ const timeSlots = [
 
 function loadRazorpayScript() {
   return new Promise((resolve) => {
-    if (document.getElementById("razorpay-script")) {
+    if (window.Razorpay) {
       resolve(true);
       return;
     }
+    const existing = document.getElementById("razorpay-script");
+    if (existing) existing.remove();
+
     const script = document.createElement("script");
     script.id = "razorpay-script";
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -282,13 +285,20 @@ function BookingContent() {
         },
       };
 
+      if (!window.Razorpay) {
+        setError("Payment gateway not available. Please refresh the page and try again.");
+        setPaymentProcessing(false);
+        return;
+      }
+
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", function (response) {
         setError(`Payment failed: ${response.error.description || "Unknown error"}. Your booking is saved.`);
         setPaymentProcessing(false);
       });
       rzp.open();
-    } catch {
+    } catch (err) {
+      console.error("Razorpay initiation error:", err);
       setError("Failed to initiate payment. Please try again.");
       setPaymentProcessing(false);
     }
