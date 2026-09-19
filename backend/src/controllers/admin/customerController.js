@@ -78,10 +78,23 @@ async function getCustomerById(req, res) {
       return res.status(404).json({ error: "Customer not found" });
     }
 
-    const [bookings, payments, superCoinHistory] = await Promise.all([
-      Booking.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
-      Payment.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
-      SuperCoinTransaction.find({ user: customer._id }).sort({ createdAt: -1 }).limit(20),
+    const [bookings, payments, superCoinHistory, activeMembership] = await Promise.all([
+      Booking.find({ user: customer._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      Payment.find({ user: customer._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate("booking", "services date timeSlot status")
+        .lean(),
+      SuperCoinTransaction.find({ user: customer._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      Membership.findOne({ user: customer._id, status: "active" })
+        .populate("plan", "name price duration benefits discount")
+        .lean(),
     ]);
 
     res.json({
@@ -91,6 +104,7 @@ async function getCustomerById(req, res) {
         bookings,
         payments,
         superCoinHistory,
+        activeMembership,
       },
     });
   } catch (err) {

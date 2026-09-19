@@ -141,7 +141,7 @@ export default function CustomersPage() {
                             {c.activeMembership ? <Crown size={14} /> : (c.name?.charAt(0)?.toUpperCase() || "?")}
                           </div>
                           <div>
-                            <span className="font-medium text-gray-900">{c.name}</span>
+                            <span className="font-medium text-rose-gold hover:underline">{c.name}</span>
                             {c.activeMembership && (
                               <p className="text-xs text-amber-600 font-medium">{c.activeMembership.planName} Member</p>
                             )}

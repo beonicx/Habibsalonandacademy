@@ -59,6 +59,9 @@ function AdminAuthProvider({ children }) {
     setToken(data.accessToken);
     localStorage.setItem("admin_token", data.accessToken);
     localStorage.setItem("admin_user", JSON.stringify(data.user));
+    if (data.refreshToken) {
+      localStorage.setItem("admin_refresh_token", data.refreshToken);
+    }
     return data;
   }, []);
 
@@ -66,6 +69,7 @@ function AdminAuthProvider({ children }) {
     setAdmin(null);
     setToken(null);
     localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_refresh_token");
     localStorage.removeItem("admin_user");
     router.push("/admin/login");
   }, [router]);

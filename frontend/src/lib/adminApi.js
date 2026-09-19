@@ -5,6 +5,39 @@ function getToken() {
   return localStorage.getItem("admin_token");
 }
 
+let refreshPromise = null;
+
+async function tryRefreshToken() {
+  if (typeof window === "undefined") return false;
+  const refreshToken = localStorage.getItem("admin_refresh_token");
+  if (!refreshToken) return false;
+
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (data.accessToken) {
+        localStorage.setItem("admin_token", data.accessToken);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 async function adminFetch(path, options = {}) {
   const token = getToken();
   const headers = { ...options.headers };
@@ -13,11 +46,21 @@ async function adminFetch(path, options = {}) {
     headers["Content-Type"] = headers["Content-Type"] || "application/json";
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      const newToken = getToken();
+      headers.Authorization = `Bearer ${newToken}`;
+      res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    }
+  }
 
   if (res.status === 401 || res.status === 403) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_refresh_token");
       localStorage.removeItem("admin_user");
       window.location.href = "/admin/login";
     }
