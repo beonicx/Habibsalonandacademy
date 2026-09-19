@@ -126,12 +126,12 @@ async function createAppointment(req, res) {
     });
 
     if (userId) {
-      await Notification.create({
+      Notification.create({
         user: userId,
         title: "New Appointment",
         message: `Your appointment on ${new Date(date).toLocaleDateString()} at ${timeSlot} has been confirmed.`,
         type: "booking",
-      });
+      }).catch((err) => console.error("Notification error:", err));
     }
 
     res.status(201).json({ success: true, data: booking });
@@ -221,12 +221,12 @@ async function updateAppointmentStatus(req, res) {
         completed: "Thank you for visiting! We hope you enjoyed your experience.",
       };
       if (messages[status]) {
-        await Notification.create({
+        Notification.create({
           user: appointment.user,
           title: `Appointment ${status.charAt(0).toUpperCase() + status.slice(1)}`,
           message: messages[status],
           type: "booking",
-        });
+        }).catch((err) => console.error("Notification error:", err));
       }
     }
 

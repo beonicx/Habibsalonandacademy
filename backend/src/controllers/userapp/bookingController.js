@@ -140,21 +140,22 @@ const createBooking = async (req, res) => {
       user.superCoins -= coinsToUse;
       await user.save();
 
-      await SuperCoinTransaction.create({
-        user: user._id,
-        points: coinsToUse,
-        type: "redeemed",
-        source: "redemption",
-        description: `Redeemed ${coinsToUse} SuperCoins on booking (₹${superCoinsDiscount} discount)`,
-        balanceAfter: user.superCoins,
-      });
-
-      await Notification.create({
-        user: user._id,
-        title: "SuperCoins Redeemed",
-        message: `You redeemed ${coinsToUse} SuperCoins for ₹${superCoinsDiscount} off your booking. Remaining: ${user.superCoins}`,
-        type: "supercoins",
-      });
+      Promise.all([
+        SuperCoinTransaction.create({
+          user: user._id,
+          points: coinsToUse,
+          type: "redeemed",
+          source: "redemption",
+          description: `Redeemed ${coinsToUse} SuperCoins on booking (₹${superCoinsDiscount} discount)`,
+          balanceAfter: user.superCoins,
+        }),
+        Notification.create({
+          user: user._id,
+          title: "SuperCoins Redeemed",
+          message: `You redeemed ${coinsToUse} SuperCoins for ₹${superCoinsDiscount} off your booking. Remaining: ${user.superCoins}`,
+          type: "supercoins",
+        }),
+      ]).catch((err) => console.error("SuperCoin post-booking write error:", err));
     }
 
     const booking = await Booking.create({
@@ -183,7 +184,7 @@ const createBooking = async (req, res) => {
       `New booking: ${booking.customerName} — ${service} on ${booking.date.toISOString()} at ${booking.timeSlot}${discountParts.length ? ` (${discountParts.join(", ")})` : ""}`
     );
 
-    await sendBookingNotification({
+    sendBookingNotification({
       name,
       email,
       phone,
@@ -191,7 +192,7 @@ const createBooking = async (req, res) => {
       date,
       time,
       notes: notes || "",
-    });
+    }).catch((err) => console.error("Booking email error:", err));
 
     const message = discountParts.length
       ? `Booking confirmed! ${discountParts.join(". ")}.`
