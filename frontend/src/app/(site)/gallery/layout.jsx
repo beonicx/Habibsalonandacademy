@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Gallery — Hair, Makeup & Beauty Transformations",
   description:
-    "Browse Habib Salon & Academy's gallery of hair transformations, bridal makeup looks, facial results, nail art & spa treatments in Ghazipur.",
+    "Browse Habib Salon & Academy's gallery of hair transformations, bridal makeup looks, facial results, nail art & spa treatments in Lucknow.",
   alternates: { canonical: "https://habibsalonacademy.com/gallery" },
 };
 

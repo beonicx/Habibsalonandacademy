@@ -907,8 +907,8 @@ function BookingContent() {
                 ? "You will be redirected to Razorpay's secure payment gateway."
                 : "We'll confirm your appointment by email within a few hours."}{" "}
               You may also call us at{" "}
-              <a href="tel:91 9565 459518" className="text-rose-gold hover:underline">
-                +91 9565 459518
+              <a href="tel:91 8528 666441" className="text-rose-gold hover:underline">
+                +91 8528 666441
               </a>.
             </p>
           </form>

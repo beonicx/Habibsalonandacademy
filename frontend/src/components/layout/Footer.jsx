@@ -91,15 +91,15 @@ export default function Footer() {
             <ul className="space-y-4 font-body text-sm text-cream/70">
               <li className="flex gap-3">
                 <MapPin size={16} className="text-rose-gold mt-1 shrink-0" />
-                <span>Mathiya (Baghi), Ghazipur, Uttar Pradesh, India</span>
+                <span>MMS1/90, Near Ram Ram Bank Chauraha, Sector-A, Aliganj, Lucknow, Uttar Pradesh 226021, India</span>
               </li>
               <li className="flex gap-3">
                 <Phone size={16} className="text-rose-gold shrink-0" />
                 <a
-                  href="tel:+919565459518"
+                  href="tel:+918528666441"
                   className="hover:text-rose-gold transition-colors duration-300"
                 >
-                  +91 9565 459518
+                  +91 8528 666441
                 </a>
               </li>
               <li className="flex gap-3">

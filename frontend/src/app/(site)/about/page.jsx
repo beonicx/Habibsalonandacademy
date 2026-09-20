@@ -4,7 +4,7 @@ import { Award, Heart, Leaf, Scissors, Users } from "lucide-react";
 export const metadata = {
   title: "About Us — Our Story, Team & Values",
   description:
-    "Learn about Habib Salon & Academy in Ghazipur — founded in 2012, 12+ years of expertise in hair, beauty, bridal makeup & skincare. Meet our team of expert stylists.",
+    "Learn about Habib Salon & Academy in Lucknow — founded in 2012, 12+ years of expertise in hair, beauty, bridal makeup & skincare. Meet our team of expert stylists.",
   alternates: { canonical: "https://habibsalonacademy.com/about" },
 };
 
@@ -35,7 +35,7 @@ export default function AboutPage() {
             <em className="text-rose-gold italic">& Academy</em>
           </h1>
           <p className="font-body text-cream/70 text-lg">
-            Founded in 2012 in Ghazipur, Habib Salon & Academy was born from a simple belief: everyone
+            Founded in 2012 in Lucknow, Habib Salon & Academy was born from a simple belief: everyone
             deserves to feel extraordinary in their own skin.
           </p>
         </div>

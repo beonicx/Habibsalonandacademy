@@ -47,12 +47,12 @@ export default function HeroSection() {
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-cream leading-[0.95] mb-6">
             Premium Salon
             <br />
-            <em className="text-rose-gold not-italic">in Ghazipur</em>
+            <em className="text-rose-gold not-italic">in Lucknow</em>
           </h1>
 
           <p className="font-body text-lg text-cream/75 mb-10 leading-relaxed max-w-lg">
             Habib Salon & Academy — expert hair styling, bridal makeup, luxury facials and spa
-            treatments in Ghazipur. Precision cuts, vibrant colour and personalised care by
+            treatments in Lucknow. Precision cuts, vibrant colour and personalised care by
             award-winning stylists.
           </p>
 

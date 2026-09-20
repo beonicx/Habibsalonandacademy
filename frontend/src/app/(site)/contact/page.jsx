@@ -47,7 +47,7 @@ export default function ContactPage() {
         </p>
         <h1 className="font-display text-6xl text-cream">Contact Habib Salon & Academy</h1>
         <p className="font-body text-cream/60 mt-4 max-w-xl mx-auto">
-          Visit us at Mathiya (Baghi), Ghazipur or call +91 9565 459518 for appointments and enquiries.
+          Visit us at MMS1/90, Near Ram Ram Bank Chauraha, Sector-A, Aliganj, Lucknow or call +91 8528 666441 for appointments and enquiries.
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export default function ContactPage() {
                 <div className="text-rose-gold mt-1 shrink-0"><MapPin size={20} /></div>
                 <div>
                   <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Address</p>
-                  <p className="font-body text-espresso">Mathiya (Baghi), Ghazipur<br />Uttar Pradesh, India</p>
+                  <p className="font-body text-espresso">MMS1/90, Near Ram Ram Bank Chauraha,<br />Sector-A, Aliganj, Lucknow<br />Uttar Pradesh 226021, India</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -73,7 +73,7 @@ export default function ContactPage() {
                 <div>
                   <p className="font-sans text-xs tracking-widest uppercase text-mocha/60 mb-1">Phone</p>
                   <p className="font-body text-espresso">
-                    <a href="tel:+919565459518" className="hover:text-rose-gold transition-colors">+91 9565 459518</a>
+                    <a href="tel:+918528666441" className="hover:text-rose-gold transition-colors">+91 8528 666441</a>
                   </p>
                 </div>
               </div>
@@ -95,14 +95,18 @@ export default function ContactPage() {
               </div>
             </address>
 
-            {/* Map placeholder */}
-            <div className="w-full h-56 bg-champagne flex items-center justify-center border border-champagne">
-              <div className="text-center text-mocha/50">
-                <MapPin size={32} className="mx-auto mb-2 text-rose-gold" />
-                <p className="font-sans text-xs tracking-widest uppercase">
-                  Mathiya, Baghi, Ghazipur, Uttar Pradesh
-                </p>
-              </div>
+            {/* Google Map */}
+            <div className="w-full h-56 border border-champagne overflow-hidden">
+              <iframe
+                title="Habib Salon & Academy Location"
+                src="https://maps.google.com/maps?q=MMS1%2F90+Sector+A+Aliganj+Lucknow+Uttar+Pradesh+226021&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
           </div>
 

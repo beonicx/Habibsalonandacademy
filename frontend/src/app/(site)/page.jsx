@@ -1,9 +1,9 @@
 export const metadata = {
   title: {
-    absolute: "Habib Salon & Academy | Best Hair, Beauty & Makeup Salon in Ghazipur",
+    absolute: "Habib Salon & Academy | Best Hair, Beauty & Makeup Salon in Lucknow",
   },
   description:
-    "Visit Habib Salon & Academy in Ghazipur for expert hair styling, bridal makeup, luxury facials, spa treatments & men's grooming. 12+ years experience, 8000+ happy clients. Book now.",
+    "Visit Habib Salon & Academy in Lucknow for expert hair styling, bridal makeup, luxury facials, spa treatments & men's grooming. 12+ years experience, 8000+ happy clients. Book now.",
   alternates: { canonical: "https://habibsalonacademy.com" },
 };
 

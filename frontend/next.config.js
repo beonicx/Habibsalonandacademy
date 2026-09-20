@@ -42,7 +42,7 @@ const nextConfig = {
               "img-src 'self' data: https: blob:",
               "font-src 'self' https://fonts.gstatic.com data:",
               `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : 'http://localhost:5001'} https://accounts.google.com https://*.habibsalonacademy.com https://*.ellieshairbeauty.com https://*.razorpay.com`,
-              "frame-src https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com",
+              "frame-src https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com https://maps.google.com https://www.google.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

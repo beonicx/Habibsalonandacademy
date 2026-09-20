@@ -40,7 +40,7 @@ export default function GalleryPage() {
         <p className="font-sans text-xs sm:text-sm tracking-[0.3em] uppercase text-rose-gold mb-3">Our Work</p>
         <h1 className="font-display text-3xl sm:text-4xl md:text-6xl text-cream">Our Work & Transformations</h1>
         <p className="font-body text-sm sm:text-base text-cream/60 mt-4 max-w-xl mx-auto">
-          Browse hair styling, bridal makeup, facial results and nail art from Habib Salon & Academy, Ghazipur.
+          Browse hair styling, bridal makeup, facial results and nail art from Habib Salon & Academy, Lucknow.
         </p>
       </div>
 
