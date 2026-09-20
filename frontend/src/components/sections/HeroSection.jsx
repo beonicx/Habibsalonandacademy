@@ -5,40 +5,63 @@ import { ArrowRight, Star } from "lucide-react";
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-espresso">
-      {/* Layered gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-espresso via-mocha/80 to-espresso" />
+      {/* Animated mesh gradient background */}
       <div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 animate-[meshMove_12s_ease-in-out_infinite]"
         style={{
-          backgroundImage:
-            "radial-gradient(ellipse at 70% 20%, #C9956B 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, #A67050 0%, transparent 45%), radial-gradient(ellipse at 90% 70%, #E8C4A0 0%, transparent 40%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse at 50% 50%, #F0E6D3 0%, transparent 60%)",
+          backgroundImage: `
+            radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201,149,107,0.35) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 80% at 80% 70%, rgba(166,112,80,0.3) 0%, transparent 55%),
+            radial-gradient(ellipse 70% 50% at 60% 10%, rgba(232,196,160,0.2) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 70% at 10% 80%, rgba(201,149,107,0.15) 0%, transparent 50%)
+          `,
         }}
       />
 
-      {/* Decorative elements */}
-      <div className="absolute top-1/4 right-[15%] w-px h-32 bg-rose-gold/40 hidden lg:block" />
-      <div className="absolute bottom-1/4 right-[20%] w-20 h-px bg-rose-gold/40 hidden lg:block" />
-      <div className="absolute top-[12%] right-[8%] w-56 h-56 border border-rose-gold/10 rounded-full hidden xl:block" />
-      <div className="absolute bottom-[18%] right-[12%] w-32 h-32 border border-rose-gold/8 rounded-full hidden xl:block" />
-      <div className="absolute top-[60%] right-[5%] w-20 h-20 border border-rose-gold/6 rounded-full hidden xl:block" />
-      <div className="absolute top-[20%] left-[3%] w-40 h-40 bg-rose-gold/8 rounded-full blur-3xl" />
-      <div className="absolute bottom-[10%] right-[20%] w-60 h-60 bg-rose-gold/6 rounded-full blur-3xl" />
-      <div className="absolute top-[50%] right-[35%] w-36 h-36 bg-champagne/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-espresso to-transparent" />
+      {/* Noise/grain texture overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "128px 128px",
+        }}
+      />
+
+      {/* Floating orbs */}
+      <div className="absolute top-[15%] right-[10%] w-72 h-72 rounded-full bg-rose-gold/10 blur-[100px] animate-[float_8s_ease-in-out_infinite]" />
+      <div className="absolute bottom-[20%] left-[5%] w-96 h-96 rounded-full bg-rose-dark/10 blur-[120px] animate-[float_10s_ease-in-out_infinite_reverse]" />
+      <div className="absolute top-[50%] right-[30%] w-64 h-64 rounded-full bg-champagne/8 blur-[80px] animate-[float_7s_ease-in-out_infinite_1s]" />
+
+      {/* Geometric accents */}
+      <div className="absolute top-[12%] right-[8%] w-64 h-64 border border-rose-gold/[0.07] rounded-full animate-[spin_40s_linear_infinite] hidden lg:block" />
+      <div className="absolute top-[14%] right-[9%] w-56 h-56 border border-rose-gold/[0.05] rounded-full animate-[spin_30s_linear_infinite_reverse] hidden lg:block" />
+      <div className="absolute bottom-[25%] right-[15%] w-40 h-40 border border-cream/[0.04] rotate-45 animate-[spin_50s_linear_infinite] hidden lg:block" />
+
+      {/* Accent lines */}
+      <div className="absolute top-0 right-[20%] w-px h-full bg-gradient-to-b from-transparent via-rose-gold/10 to-transparent hidden lg:block" />
+      <div className="absolute top-0 right-[40%] w-px h-full bg-gradient-to-b from-transparent via-cream/5 to-transparent hidden xl:block" />
+
+      {/* Dot grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.03] hidden lg:block"
+        style={{
+          backgroundImage: "radial-gradient(circle, #C9956B 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-espresso via-espresso/60 to-transparent" />
+      {/* Top subtle vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(44,26,14,0.5)_100%)]" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24">
         <div className="max-w-2xl">
           {/* Tag */}
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-px bg-rose-gold" />
-            <span className="font-sans text-xs tracking-[0.3em] uppercase text-rose-gold">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="w-10 h-px bg-gradient-to-r from-rose-gold to-transparent" />
+            <span className="font-sans text-xs tracking-[0.3em] uppercase text-rose-gold/90">
               Premium Hair & Beauty Salon
             </span>
           </div>
@@ -59,20 +82,20 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-4">
             <Link
               href="/booking"
-              className="inline-flex items-center gap-2 bg-rose-gold text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-espresso hover:scale-105 active:scale-95"
+              className="group inline-flex items-center gap-2 bg-rose-gold text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-cream hover:text-espresso hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(201,149,107,0.3)]"
             >
-              Book Appointment <ArrowRight size={16} />
+              Book Appointment <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               href="/services"
-              className="inline-flex items-center gap-2 border border-cream/50 text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-cream hover:text-espresso"
+              className="inline-flex items-center gap-2 border border-cream/30 text-cream px-8 py-3.5 font-sans text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:bg-cream/10 hover:border-cream/60 backdrop-blur-sm"
             >
               Our Services
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="flex gap-10 mt-16 pt-10 border-t border-cream/20">
+          <div className="flex gap-10 mt-16 pt-10 border-t border-cream/10">
             {[
               { value: "12+", label: "Years Experience" },
               { value: "8K+", label: "Happy Clients" },
@@ -99,6 +122,18 @@ export default function HeroSection() {
           <div className="w-full h-1/2 bg-rose-gold absolute top-0 animate-bounce" />
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes meshMove {
+          0%, 100% { transform: scale(1) translate(0, 0); }
+          33% { transform: scale(1.05) translate(2%, -1%); }
+          66% { transform: scale(0.98) translate(-1%, 2%); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-20px) scale(1.05); }
+        }
+      `}</style>
     </section>
   );
 }

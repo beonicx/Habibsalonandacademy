@@ -61,16 +61,29 @@ function parseSize(size) {
   return parseInt(match[1], 10) * (units[match[2]?.toLowerCase() || "b"] || 1);
 }
 
+const IGNORED_PATHS = [
+  "/json/version",
+  "/json",
+  "/json/list",
+  "/devtools/",
+];
+
 function securityLogger(req, res, next) {
   const start = Date.now();
 
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (res.statusCode >= 400) {
+      const url = req.originalUrl;
+
+      if (IGNORED_PATHS.some((p) => url.startsWith(p))) return;
+
+      if ((res.statusCode === 401 || res.statusCode === 403) && url === "/api/auth/profile") return;
+
       const meta = {
         ip: req.ip,
         method: req.method,
-        url: req.originalUrl,
+        url,
         status: res.statusCode,
         duration,
         ua: (req.headers["user-agent"] || "").substring(0, 100),
